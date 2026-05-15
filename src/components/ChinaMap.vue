@@ -1,5 +1,8 @@
 <template>
   <div class="china-map-container">
+    <!-- 星云粒子背景层 — 渲染在 ECharts 下方 -->
+    <MapNebula v-if="!loading && !hasError" />
+
     <!-- Loading -->
     <template v-if="loading">
       <SkeletonLoader type="map" />
@@ -10,7 +13,7 @@
       <ErrorDisplay :message="errorMsg" @retry="loadMap" />
     </template>
 
-    <!-- Map -->
+    <!-- Map — 渲染在星云层上方 -->
     <v-chart
       v-else
       ref="chartRef"
@@ -30,13 +33,16 @@ import VChart from 'vue-echarts'
 import { loadChinaGeoJSON } from '../utils/geoJSONLoader.js'
 import SkeletonLoader from './SkeletonLoader.vue'
 import ErrorDisplay from './ErrorDisplay.vue'
+import MapNebula from './MapNebula.vue'
 
 const mockData = inject('mockData')
 const chartRef = ref(null)
 const loading = ref(true)
 const mapError = ref(null)
+const borderAlpha = ref(0.35)
 let carouselTimer = null
 let currentCarouselIndex = 0
+let breatheTimer = null
 
 const hasError = computed(() => !!mapError.value)
 const errorMsg = computed(() => mapError.value || '地图加载失败')
@@ -142,9 +148,9 @@ const chartOption = computed(() => ({
     layoutSize: '100%',
     itemStyle: {
       areaColor: '#020f1e',
-      borderColor: 'rgba(0, 180, 220, 0.4)',
+      borderColor: `rgba(0, 180, 220, ${borderAlpha.value})`,
       borderWidth: 1,
-      shadowColor: 'rgba(0, 212, 255, 0.25)',
+      shadowColor: `rgba(0, 212, 255, ${borderAlpha.value * 0.8})`,
       shadowOffsetX: 0,
       shadowOffsetY: 8,
       shadowBlur: 20
@@ -178,7 +184,7 @@ const chartOption = computed(() => ({
       geoIndex: 0,
       itemStyle: {
         areaColor: '#0d2a50',
-        borderColor: 'rgba(0, 180, 220, 0.5)',
+        borderColor: `rgba(0, 180, 220, ${borderAlpha.value + 0.15})`,
         borderWidth: 1
       },
       emphasis: {
@@ -213,16 +219,16 @@ const chartOption = computed(() => ({
       coordinateSystem: 'geo',
       geoIndex: 0,
       rippleEffect: {
-        number: 3,
-        period: 5,
-        scale: 3,
+        number: 4,
+        period: 6,
+        scale: 4.5,
         brushType: 'stroke'
       },
       symbol: 'circle',
-      symbolSize: 6,
+      symbolSize: 7,
       itemStyle: {
         color: '#00d4ff',
-        shadowBlur: 12,
+        shadowBlur: 18,
         shadowColor: '#00d4ff'
       },
       label: {
@@ -243,16 +249,16 @@ const chartOption = computed(() => ({
       geoIndex: 0,
       effect: {
         show: true,
-        period: 6,
-        trailLength: 0.2,
+        period: 4,
+        trailLength: 0.35,
         symbol: 'arrow',
-        symbolSize: 6
+        symbolSize: 5
       },
       lineStyle: {
         color: '#00d4ff',
-        width: 1.5,
+        width: 1.2,
         curveness: 0.3,
-        opacity: 0.6
+        opacity: 0.55
       },
       data: linesData.value,
       zlevel: 1
@@ -293,6 +299,29 @@ function onMapClick(params) {
 function onMapHover() { stopCarousel() }
 function onMapLeave() { startCarousel() }
 
+function startBorderBreathe() {
+  stopBorderBreathe()
+  let phase = 0
+  breatheTimer = setInterval(() => {
+    phase += 0.03
+    borderAlpha.value = 0.25 + 0.2 * (0.5 + 0.5 * Math.sin(phase))
+    if (chartRef.value) {
+      chartRef.value.setOption({
+        geo: {
+          itemStyle: { borderColor: `rgba(0, 180, 220, ${borderAlpha.value})` }
+        },
+        series: [{
+          itemStyle: { borderColor: `rgba(0, 180, 220, ${borderAlpha.value + 0.15})` }
+        }]
+      })
+    }
+  }, 50)
+}
+
+function stopBorderBreathe() {
+  if (breatheTimer) { clearInterval(breatheTimer); breatheTimer = null }
+}
+
 async function loadMap() {
   loading.value = true
   mapError.value = null
@@ -307,10 +336,19 @@ async function loadMap() {
 
 onMounted(() => {
   loadMap()
+  // Start border breathing once chart is ready
+  const checkReady = setInterval(() => {
+    if (chartRef.value && !loading.value) {
+      clearInterval(checkReady)
+      startBorderBreathe()
+      startCarousel()
+    }
+  }, 200)
 })
 
 onUnmounted(() => {
   stopCarousel()
+  stopBorderBreathe()
 })
 </script>
 
@@ -324,6 +362,8 @@ onUnmounted(() => {
 .china-map-chart {
   width: 100%;
   height: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .china-map-chart :deep(canvas) {
