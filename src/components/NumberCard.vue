@@ -35,7 +35,10 @@
         <span class="card-prefix" v-if="prefix">{{ prefix }}</span>
         <span class="card-number">{{ displayText }}</span>
         <span class="card-suffix" v-if="suffix">{{ suffix }}</span>
+        <span class="card-phantom">{{ displayText }}</span>
       </div>
+      <div class="card-glow-bar" />
+      <div class="card-scanlines" />
     </template>
   </div>
 </template>
@@ -189,13 +192,72 @@ function onLeave() { /* leave handled by CSS */ }
 .card-number {
   font-size: clamp(18px, 2.6vh, 28px);
   font-weight: 700;
-  color: var(--text-primary);
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  letter-spacing: 1px;
-  text-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+  color: #e0f0ff;
+  font-family: 'Orbitron', 'Consolas', 'Monaco', monospace;
+  letter-spacing: 2px;
+  animation: number-glow-breathe 3s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+}
+
+/* 背景暗影数字 — HUD 头盔反射 */
+.card-phantom {
+  position: absolute;
+  right: clamp(8px, 1vw, 16px);
+  bottom: 2px;
+  font-size: clamp(28px, 4.5vh, 50px);
+  font-weight: 900;
+  font-family: 'Orbitron', 'Consolas', monospace;
+  color: rgba(0, 212, 255, 0.04);
+  letter-spacing: 2px;
+  pointer-events: none;
+  z-index: 0;
+  white-space: nowrap;
+}
+
+/* 底部发光槽 */
+.card-glow-bar {
+  position: absolute;
+  bottom: 2px;
+  left: 10%;
+  width: 80%;
+  height: 1.5px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(0, 212, 255, 0.3) 15%,
+    rgba(0, 212, 255, 0.8) 50%,
+    rgba(0, 212, 255, 0.3) 85%,
+    transparent 100%
+  );
+  border-radius: 1px;
+  animation: card-bar-glow 2.5s ease-in-out infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* CRT 扫描线纹理 */
+.card-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 2;
+  border-radius: var(--panel-radius);
 }
 
 .is-flash .card-number {
-  animation: flash-cyan 0.4s ease-out;
+  animation: flash-cyan 0.4s ease-out, number-glow-breathe 3s ease-in-out infinite;
+}
+
+.is-flash .card-glow-bar {
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.8);
+  transition: all 0.2s ease;
 }
 </style>

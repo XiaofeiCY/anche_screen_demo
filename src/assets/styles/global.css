@@ -1,3 +1,26 @@
+/* ========== 字体 ========== */
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/Orbitron-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 700;
+  src: url('../fonts/Orbitron-Bold.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 900;
+  src: url('../fonts/Orbitron-Black.ttf') format('truetype');
+  font-display: swap;
+}
+
 :root {
   /* 2.0 深邃底色 */
   --bg-deep: #020b16;
@@ -104,6 +127,30 @@ html, body {
 @keyframes glow-pulse {
   0%, 100% { box-shadow: 0 0 8px var(--glow-cyan); }
   50% { box-shadow: 0 0 22px var(--glow-cyan-strong); }
+}
+
+@keyframes number-glow-breathe {
+  0%, 100% {
+    text-shadow:
+      0 0 2px #ffffff,
+      0 0 4px #00d4ff,
+      0 0 10px #00d4ff,
+      0 0 22px #00a8cc,
+      0 0 45px #006080;
+  }
+  50% {
+    text-shadow:
+      0 0 3px #ffffff,
+      0 0 8px #8ee4ff,
+      0 0 18px #00d4ff,
+      0 0 35px #00b8e0,
+      0 0 70px #0070a0;
+  }
+}
+
+@keyframes card-bar-glow {
+  0%, 100% { opacity: 0.5; width: 60%; }
+  50% { opacity: 1; width: 90%; }
 }
 
 /* ========== 玻璃态面板 ========== */
