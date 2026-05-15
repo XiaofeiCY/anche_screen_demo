@@ -1,0 +1,57 @@
+:root {
+  --bg-primary: #081a2e;
+  --bg-panel: rgba(28, 63, 118, 0.6);
+  --bg-panel-hover: rgba(37, 84, 135, 0.8);
+  --accent: #1d70e0;
+  --accent-light: #4fc3f7;
+  --text-primary: #e0e6ed;
+  --text-secondary: #8899aa;
+  --success: #4caf50;
+  --danger: #f44336;
+  --border-subtle: rgba(77, 128, 186, 0.3);
+  --panel-radius: 6px;
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+}
+
+/* Skeleton pulse animation */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+/* Title breathe animation */
+@keyframes breathe {
+  0%, 100% { text-shadow: 0 0 10px rgba(77, 195, 247, 0.3); }
+  50% { text-shadow: 0 0 25px rgba(77, 195, 247, 0.7), 0 0 50px rgba(29, 112, 224, 0.4); }
+}
+
+/* Fade in animation for panels */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Flash animation for number cards */
+@keyframes flash-blue {
+  0% { color: var(--accent-light); }
+  100% { color: var(--text-primary); }
+}
+
+.flash {
+  animation: flash-blue 0.4s ease-out;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(77, 128, 186, 0.4); border-radius: 2px; }
+
+/* Global font */
+body {
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--text-primary);
+  user-select: none;
+}
