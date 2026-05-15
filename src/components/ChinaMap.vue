@@ -296,8 +296,16 @@ function onMapClick(params) {
   }
 }
 
-function onMapHover() { stopCarousel() }
-function onMapLeave() { startCarousel() }
+const isHovering = ref(false)
+
+function onMapHover() {
+  isHovering.value = true
+  stopCarousel()
+}
+function onMapLeave() {
+  isHovering.value = false
+  startCarousel()
+}
 
 function startBorderBreathe() {
   stopBorderBreathe()
@@ -305,7 +313,7 @@ function startBorderBreathe() {
   breatheTimer = setInterval(() => {
     phase += 0.03
     borderAlpha.value = 0.25 + 0.2 * (0.5 + 0.5 * Math.sin(phase))
-    if (chartRef.value) {
+    if (chartRef.value && !isHovering.value) {
       chartRef.value.setOption({
         geo: {
           itemStyle: { borderColor: `rgba(0, 180, 220, ${borderAlpha.value})` }
