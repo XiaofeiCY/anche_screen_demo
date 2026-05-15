@@ -75,7 +75,7 @@ const handleRetry = debounce(() => {
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
   background: rgba(29, 112, 224, 0.2);
-  color: var(--accent-light);
+  color: var(--accent-cyan);
   font-size: 13px;
   cursor: pointer;
   transition: background var(--transition-fast);

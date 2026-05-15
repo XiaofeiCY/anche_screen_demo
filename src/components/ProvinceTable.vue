@@ -223,7 +223,7 @@ onUnmounted(() => {
   font-size: 13px;
   text-align: right;
   font-family: 'Consolas', 'Monaco', monospace;
-  color: var(--accent-light);
+  color: var(--accent-cyan);
 }
 
 .empty-state {

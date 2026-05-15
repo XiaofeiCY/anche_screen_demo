@@ -46,49 +46,76 @@ for (const p of PROVINCE_BASE) {
   deduped.push(p)
 }
 
+// 持久化省份状态 — 每次刷新在上次数据基础上随机游走
+let provinceState = null
+// 保存上一次排名快照（按省份名），用于跨次调用的趋势对比
+let lastRankMap = null
+
 /**
  * 生成省份统计数据
- * 随机微调数值（±3%）和排名变动
+ * 使用随机游走模型：每次在上次数据基础上 ±12% 漂移，
+ * 让省份排名随时间自然变化
  */
 export function generateProvinceStats() {
-  const shuffled = [...deduped]
-    .map(p => ({
-      ...p,
-      activeSites: Math.round(p.activeSites * (1 + (Math.random() - 0.5) * 0.06)),
-      onlineSites: Math.round(p.onlineSites * (1 + (Math.random() - 0.5) * 0.06)),
-      orderCount: Math.round(p.orderCount * (1 + (Math.random() - 0.5) * 0.06)),
-      orderAmount: Math.round(p.orderAmount * (1 + (Math.random() - 0.5) * 0.06))
-    }))
+  if (!provinceState) {
+    // 首次：从基准数据初始化
+    provinceState = {}
+    deduped.forEach(p => {
+      provinceState[p.name] = {
+        activeSites: p.activeSites,
+        onlineSites: p.onlineSites,
+        orderCount: p.orderCount,
+        orderAmount: p.orderAmount
+      }
+    })
+  }
 
-  // 按活跃站点数排序，生成排名
-  shuffled.sort((a, b) => b.activeSites - a.activeSites)
+  // 随机游走：每个省份各项数据 ±12% 漂移
+  const drift = () => 1 + (Math.random() - 0.5) * 0.24
+  const entries = []
+  for (const [name, state] of Object.entries(provinceState)) {
+    const newActive = Math.round(Math.max(0, state.activeSites * drift()))
+    const newOnline = Math.round(Math.max(0, state.onlineSites * drift()))
+    const newCount = Math.round(Math.max(0, state.orderCount * drift()))
+    const newAmount = Math.round(Math.max(0, state.orderAmount * drift()))
 
-  const result = shuffled.map((p, idx) => ({
-    ...p,
-    activeRank: idx + 1,
-    prevActiveRank: p.prevActiveRank || idx + 1
-  }))
+    entries.push({
+      name,
+      activeSites: newActive,
+      onlineSites: newOnline,
+      orderCount: newCount,
+      orderAmount: newAmount
+    })
 
-  // 随机调换相邻排名（模拟排名变化）
-  const swapCount = 3 + Math.floor(Math.random() * 5)
-  for (let i = 0; i < swapCount; i++) {
-    const a = Math.floor(Math.random() * 10) // 前10名变动
-    const b = a + (Math.random() > 0.5 ? 1 : -1)
-    if (b >= 0 && b < result.length && Math.abs(a - b) === 1) {
-      const temp = result[a].activeRank
-      result[a].activeRank = result[b].activeRank
-      result[b].activeRank = temp
-      // 交换位置
-      const t = result[a]
-      result[a] = result[b]
-      result[b] = t
+    // 更新持久化状态
+    provinceState[name] = {
+      activeSites: newActive,
+      onlineSites: newOnline,
+      orderCount: newCount,
+      orderAmount: newAmount
     }
   }
 
-  // 更新 prevActiveRank（保存本次结果以便下次对比）
-  result.forEach(p => {
-    p.prevActiveRank = p.activeRank
+  // 按活跃站点数排序
+  entries.sort((a, b) => b.activeSites - a.activeSites)
+
+  // 本次排名
+  const currentRankMap = {}
+  entries.forEach((p, idx) => {
+    currentRankMap[p.name] = idx + 1
   })
+
+  // 用上次排名快照作为 prevActiveRank
+  const prevMap = lastRankMap || currentRankMap
+
+  const result = entries.map((p, idx) => ({
+    ...p,
+    activeRank: idx + 1,
+    prevActiveRank: prevMap[p.name] || idx + 1
+  }))
+
+  // 保存本次排名快照供下次调用使用
+  lastRankMap = currentRankMap
 
   return result
 }

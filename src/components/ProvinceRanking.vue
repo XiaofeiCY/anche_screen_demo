@@ -23,7 +23,7 @@
         <span class="col-change">趋势</span>
       </div>
       <div
-        v-for="item in topProvinces"
+        v-for="(item, idx) in topProvinces"
         :key="item.name"
         class="ranking-row"
         :class="{ 'is-selected': selectedProvince === item.name, 'is-touched': touchedRow === item.name }"
@@ -32,8 +32,8 @@
         @touchend="touchedRow = null"
         @touchcancel="touchedRow = null"
       >
-        <span class="col-rank" :class="'rank-' + item.activeRank">
-          {{ item.activeRank }}
+        <span class="col-rank" :class="'rank-' + (idx + 1)">
+          {{ idx + 1 }}
         </span>
         <span class="col-name">{{ item.name }}</span>
         <span class="col-bar">
@@ -144,7 +144,7 @@ function onRetry() {
 
 .ranking-row.is-selected {
   background: rgba(29, 112, 224, 0.2);
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--accent-cyan);
 }
 
 .col-rank {
@@ -186,7 +186,7 @@ function onRetry() {
 .progress-fill {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
   border-radius: 4px;
   transition: width 1s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
