@@ -1,25 +1,9 @@
 <template>
   <div class="trend-chart-container">
-    <!-- Loading -->
     <SkeletonLoader v-if="loading" type="chart" />
-
-    <!-- Error -->
-    <ErrorDisplay
-      v-else-if="hasError"
-      :message="errorMsg"
-      @retry="onRetry"
-    />
-
-    <!-- Empty -->
+    <ErrorDisplay v-else-if="hasError" :message="errorMsg" @retry="onRetry" />
     <div v-else-if="isEmpty" class="empty-state">暂无趋势数据</div>
-
-    <!-- Normal -->
-    <v-chart
-      v-else
-      class="trend-chart"
-      :option="chartOption"
-      :autoresize="true"
-    />
+    <v-chart v-else class="trend-chart" :option="chartOption" :autoresize="true" />
   </div>
 </template>
 
@@ -43,33 +27,25 @@ const chartOption = computed(() => {
   return {
     tooltip: {
       trigger: 'axis',
-      backgroundColor: 'rgba(8, 26, 46, 0.9)',
-      borderColor: 'rgba(77, 128, 186, 0.6)',
+      backgroundColor: 'rgba(2, 11, 22, 0.85)',
+      borderColor: 'rgba(0, 212, 255, 0.4)',
       textStyle: { color: '#e0e6ed', fontSize: 12 },
-      axisPointer: {
-        type: 'cross',
-        crossStyle: { color: '#8899aa' }
-      }
+      axisPointer: { type: 'cross', crossStyle: { color: 'rgba(0, 212, 255, 0.5)' } }
     },
     legend: {
       data: ['订单金额', '订单量'],
-      top: 0,
-      textStyle: { color: '#8899aa', fontSize: 11 }
+      top: 2,
+      textStyle: { color: '#7a8fa0', fontSize: 11 }
     },
     animation: true,
     animationDuration: 800,
     animationEasing: 'cubicOut',
-    grid: {
-      left: 52,
-      right: 52,
-      top: 30,
-      bottom: 40
-    },
+    grid: { left: 52, right: 52, top: 30, bottom: 40 },
     xAxis: {
       type: 'category',
       data: data.categories,
-      axisLine: { lineStyle: { color: 'rgba(77, 128, 186, 0.4)' } },
-      axisLabel: { color: '#8899aa', fontSize: 10, margin: 10 },
+      axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.15)' } },
+      axisLabel: { color: '#7a8fa0', fontSize: 10, margin: 10 },
       axisTick: { show: false }
     },
     yAxis: [
@@ -78,21 +54,17 @@ const chartOption = computed(() => {
         name: '金额(万元)',
         nameLocation: 'middle',
         nameGap: 36,
-        nameTextStyle: { color: '#8899aa', fontSize: 10 },
-        axisLabel: {
-          color: '#8899aa',
-          fontSize: 10,
-          formatter: (v) => (v / 10000).toFixed(0)
-        },
-        splitLine: { lineStyle: { color: 'rgba(77, 128, 186, 0.15)' } }
+        nameTextStyle: { color: '#7a8fa0', fontSize: 10 },
+        axisLabel: { color: '#7a8fa0', fontSize: 10, formatter: (v) => (v / 10000).toFixed(0) },
+        splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.06)' } }
       },
       {
         type: 'value',
         name: '订单量(单)',
         nameLocation: 'middle',
         nameGap: 36,
-        nameTextStyle: { color: '#8899aa', fontSize: 10 },
-        axisLabel: { color: '#8899aa', fontSize: 10 },
+        nameTextStyle: { color: '#7a8fa0', fontSize: 10 },
+        axisLabel: { color: '#7a8fa0', fontSize: 10 },
         splitLine: { show: false }
       }
     ],
@@ -102,11 +74,17 @@ const chartOption = computed(() => {
         type: 'bar',
         data: data.orderAmount,
         itemStyle: {
-          color: 'rgba(29, 112, 224, 0.8)',
+          color: {
+            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [
+              { offset: 0, color: 'rgba(0, 212, 255, 0.9)' },
+              { offset: 1, color: 'rgba(10, 110, 255, 0.4)' }
+            ]
+          },
           borderRadius: [3, 3, 0, 0]
         },
         emphasis: {
-          itemStyle: { color: '#4fc3f7' },
+          itemStyle: { color: '#00d4ff', shadowBlur: 12, shadowColor: 'rgba(0, 212, 255, 0.6)' },
           focus: 'series'
         },
         barMaxWidth: 24,
@@ -118,9 +96,18 @@ const chartOption = computed(() => {
         data: data.orderCount,
         smooth: true,
         symbol: 'circle',
-        symbolSize: 5,
-        lineStyle: { color: '#4fc3f7', width: 2 },
-        itemStyle: { color: '#4fc3f7' },
+        symbolSize: 6,
+        lineStyle: { color: '#00d4ff', width: 2, shadowBlur: 6, shadowColor: 'rgba(0,212,255,0.4)' },
+        itemStyle: { color: '#00d4ff', borderColor: '#fff', borderWidth: 1 },
+        areaStyle: {
+          color: {
+            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [
+              { offset: 0, color: 'rgba(0, 212, 255, 0.2)' },
+              { offset: 1, color: 'rgba(0, 212, 255, 0.02)' }
+            ]
+          }
+        },
         emphasis: { focus: 'series' },
         yAxisIndex: 1
       }
@@ -128,29 +115,14 @@ const chartOption = computed(() => {
   }
 })
 
-function onRetry() {
-  mockData.retryTrend()
-}
+function onRetry() { mockData.retryTrend() }
 </script>
 
 <style scoped>
-.trend-chart-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
-
-.trend-chart {
-  width: 100%;
-  height: 100%;
-}
-
+.trend-chart-container { width: 100%; height: 100%; position: relative; }
+.trend-chart { width: 100%; height: 100%; }
 .empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--text-secondary);
-  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  height: 100%; color: var(--text-secondary); font-size: 13px;
 }
 </style>

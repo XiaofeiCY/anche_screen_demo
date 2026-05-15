@@ -98,30 +98,62 @@ function onLeave() { /* leave handled by CSS */ }
 <style scoped>
 .number-card {
   background: var(--bg-panel);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: var(--panel-radius);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-panel);
   padding: clamp(6px, 1vh, 12px) clamp(8px, 1vw, 16px);
   cursor: pointer;
+  position: relative;
   transition: transform var(--transition-normal),
               background var(--transition-normal),
               box-shadow var(--transition-normal),
               border-color var(--transition-normal);
-  animation: fadeInUp 0.5s ease both;
+  animation: fadeInUp 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) both;
   user-select: none;
   -webkit-user-select: none;
+  overflow: hidden;
+}
+
+/* 科技角标 */
+.number-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 10px; height: 10px;
+  border-top: 2px solid var(--accent-cyan);
+  border-left: 2px solid var(--accent-cyan);
+  opacity: 0.4;
+  transition: opacity var(--transition-fast);
+}
+
+.number-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 10px; height: 10px;
+  border-bottom: 2px solid var(--accent-cyan);
+  border-right: 2px solid var(--accent-cyan);
+  opacity: 0.4;
+  transition: opacity var(--transition-fast);
+}
+
+.number-card:hover::before,
+.number-card:hover::after {
+  opacity: 0.9;
 }
 
 .number-card:hover {
   background: var(--bg-panel-hover);
-  transform: scale(1.02);
-  box-shadow: 0 0 16px rgba(29, 112, 224, 0.3);
-  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px var(--glow-cyan), inset 0 0 20px rgba(0, 212, 255, 0.05);
+  border-color: var(--accent-cyan);
 }
 
 .number-card:active,
 .number-card.is-pressed {
-  transform: scale(0.98);
-  background: rgba(28, 63, 118, 0.8);
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 0 10px var(--glow-cyan);
 }
 
 .number-card.is-loading {
@@ -151,18 +183,19 @@ function onLeave() { /* leave handled by CSS */ }
 .card-prefix,
 .card-suffix {
   font-size: clamp(12px, 1.5vh, 16px);
-  color: var(--accent-light);
+  color: var(--accent-cyan);
 }
 
 .card-number {
   font-size: clamp(18px, 2.6vh, 28px);
   font-weight: 700;
   color: var(--text-primary);
-  font-family: 'DIN', 'Consolas', 'Monaco', monospace;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
 }
 
 .is-flash .card-number {
-  animation: flash-blue 0.4s ease-out;
+  animation: flash-cyan 0.4s ease-out;
 }
 </style>

@@ -24,12 +24,12 @@ import RightPanel from './RightPanel.vue'
   height: 100vh;
   padding: 0.5vw;
   box-sizing: border-box;
-  background: var(--bg-primary);
 }
 
 .layout-header {
   grid-column: 1 / -1;
   grid-row: 1;
+  animation: fadeInUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) both;
 }
 
 .layout-left {
@@ -38,6 +38,7 @@ import RightPanel from './RightPanel.vue'
   overflow: hidden;
   min-height: 0;
   min-width: 0;
+  animation: fadeInUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) 0.1s both;
 }
 
 .layout-center {
@@ -46,6 +47,7 @@ import RightPanel from './RightPanel.vue'
   overflow: hidden;
   min-height: 0;
   min-width: 0;
+  animation: fadeInUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s both;
 }
 
 .layout-right {
@@ -54,5 +56,6 @@ import RightPanel from './RightPanel.vue'
   overflow: hidden;
   min-height: 0;
   min-width: 0;
+  animation: fadeInUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) 0.3s both;
 }
 </style>

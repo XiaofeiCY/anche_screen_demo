@@ -40,16 +40,37 @@ onUnmounted(() => {
   height: 5.5vh;
   min-height: 40px;
   padding: 0 2vw;
-  background: linear-gradient(180deg, rgba(28, 63, 118, 0.9) 0%, rgba(28, 63, 118, 0.4) 100%);
-  border-bottom: 1px solid var(--border-subtle);
+  background: linear-gradient(180deg,
+    rgba(5, 20, 40, 0.95) 0%,
+    rgba(8, 32, 64, 0.7) 100%
+  );
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border-glow);
   position: relative;
+}
+
+/* 底部科技装饰线 */
+.dashboard-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 5%;
+  width: 90%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent, var(--accent-cyan), transparent
+  );
+  opacity: 0.5;
 }
 
 .header-title {
   font-size: clamp(18px, 2.2vh, 28px);
   font-weight: 600;
-  letter-spacing: 0.3vw;
-  color: var(--text-primary);
+  letter-spacing: 0.5vw;
+  background: linear-gradient(180deg, #e0f0ff 0%, #80c8ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   animation: breathe 3s ease-in-out infinite;
   white-space: nowrap;
 }

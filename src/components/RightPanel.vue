@@ -39,12 +39,15 @@ import ProvinceTable from './ProvinceTable.vue'
 
 .right-section {
   background: var(--bg-panel);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: var(--panel-radius);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-panel);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
+  position: relative;
 }
 
 .right-section--chart {
@@ -62,10 +65,22 @@ import ProvinceTable from './ProvinceTable.vue'
 
 .section-title {
   font-size: clamp(10px, 1.1vh, 12px);
-  color: var(--text-secondary);
+  color: var(--accent-cyan);
   padding: 0.5vh 0.8vw;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-glow);
   flex-shrink: 0;
+  letter-spacing: 1px;
+  position: relative;
+}
+
+/* 标题左侧青色指示条 */
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 25%; bottom: 25%;
+  width: 2px;
+  background: var(--accent-cyan);
+  border-radius: 1px;
 }
 
 .section-body {

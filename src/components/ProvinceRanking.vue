@@ -148,16 +148,19 @@ function onRetry() {
 }
 
 .col-rank {
-  flex: 0 0 28px;
-  font-size: 13px;
-  font-weight: 600;
+  flex: 0 0 32px;
+  width: 32px; height: 20px;
+  font-size: 12px;
+  font-weight: 700;
   text-align: center;
+  line-height: 20px;
   color: var(--text-secondary);
+  border-radius: 3px;
 }
 
-.col-rank.rank-1 { color: #ffd700; }
-.col-rank.rank-2 { color: #c0c0c0; }
-.col-rank.rank-3 { color: #cd7f32; }
+.col-rank.rank-1 { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
+.col-rank.rank-2 { background: rgba(192, 192, 192, 0.15); color: #c0c0c0; }
+.col-rank.rank-3 { background: rgba(205, 127, 50, 0.2); color: #cd7f32; }
 
 .col-name {
   flex: 0 0 68px;

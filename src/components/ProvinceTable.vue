@@ -184,15 +184,16 @@ onUnmounted(() => {
 }
 
 .table-row:hover {
-  background: rgba(77, 128, 186, 0.15);
+  background: rgba(0, 212, 255, 0.1);
 }
 
 .table-row:active {
-  background: rgba(77, 128, 186, 0.25);
+  background: rgba(0, 212, 255, 0.2);
 }
 
 .table-row.is-selected {
-  background: rgba(29, 112, 224, 0.2);
+  background: rgba(0, 212, 255, 0.15);
+  box-shadow: inset 2px 0 0 var(--accent-cyan);
 }
 
 .th-rank {
