@@ -1,6 +1,6 @@
 import * as echarts from 'echarts'
 
-const GEOJSON_LOCAL_URL = '/geojson/china.json'
+const GEOJSON_LOCAL_URL = `${import.meta.env.BASE_URL}geojson/china.json`
 const GEOJSON_CDN_URL = 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json'
 const STORAGE_KEY = 'anche_china_geojson'
 
