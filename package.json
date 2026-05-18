@@ -9,8 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.4.0",
     "echarts": "^5.5.0",
+    "echarts-gl": "^2.0.9",
+    "vue": "^3.4.0",
     "vue-echarts": "^7.0.0"
   },
   "devDependencies": {

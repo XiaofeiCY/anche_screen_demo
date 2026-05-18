@@ -71,7 +71,6 @@ import ErrorDisplay from './ErrorDisplay.vue'
 const mockData = inject('mockData')
 const { debounce } = useInteraction({ debounceMs: 300 })
 
-const selectedProvince = ref(null)
 const touchedRow = ref(null)
 const listRef = ref(null)
 
@@ -79,6 +78,7 @@ const loading = computed(() => mockData.loading.value)
 const hasError = computed(() => !!mockData.provinceError.value)
 const errorMsg = computed(() => mockData.provinceError.value || '排名数据加载失败')
 const isEmpty = computed(() => !mockData.provinceStats.value || mockData.provinceStats.value.length === 0)
+const selectedProvince = computed(() => mockData.selectedProvince.value)
 
 const topProvinces = computed(() => {
   if (!mockData.provinceStats.value) return []
@@ -91,7 +91,11 @@ const maxSites = computed(() => {
 })
 
 const selectProvince = debounce((item) => {
-  selectedProvince.value = selectedProvince.value === item.name ? null : item.name
+  if (selectedProvince.value === item.name) {
+    mockData.clearSelection()
+  } else {
+    mockData.selectProvince(item.name)
+  }
 })
 
 function onRetry() {

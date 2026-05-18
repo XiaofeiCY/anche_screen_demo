@@ -17,6 +17,7 @@ export function useMockData() {
   // --- 状态 ---
   const loading = ref(true)
   const error = ref(null)
+  const selectedProvince = ref(null) // 省份下钻选中（null=全国视图）
 
   // 汇总指标
   const orderSummary = ref(null)
@@ -126,6 +127,15 @@ export function useMockData() {
     loadAll()
   }
 
+  // --- 省份下钻 ---
+  function selectProvince(name) {
+    selectedProvince.value = name
+  }
+
+  function clearSelection() {
+    selectedProvince.value = null
+  }
+
   // --- 计算属性 ---
   const indicators = computed(() => {
     if (!orderSummary.value) return []
@@ -175,6 +185,10 @@ export function useMockData() {
     retryProvince: refreshProvinceStats,
     retryTrend: refreshTrendData,
     // 异常模拟开关
-    simulateErrorEnabled
+    simulateErrorEnabled,
+    // 省份下钻
+    selectedProvince,
+    selectProvince,
+    clearSelection
   }
 }

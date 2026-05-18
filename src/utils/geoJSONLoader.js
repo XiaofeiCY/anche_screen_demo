@@ -4,11 +4,24 @@ const GEOJSON_LOCAL_URL = `${import.meta.env.BASE_URL}geojson/china.json`
 const GEOJSON_CDN_URL = 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json'
 const STORAGE_KEY = 'anche_china_geojson'
 
+function isMapRegistered() {
+  try {
+    return !!echarts.getMap('china')
+  } catch (e) {
+    return false
+  }
+}
+
 /**
  * 中国 GeoJSON 加载器
  * 降级策略：本地 → 重试2次 → CDN → localStorage → 报错
  */
 export async function loadChinaGeoJSON() {
+  // 0. 如果已经注册过了（例如 2D 地图先加载了），直接返回
+  if (isMapRegistered()) {
+    return { success: true, source: 'existing' }
+  }
+
   // 1. 尝试从 localStorage 加载缓存
   try {
     const cached = localStorage.getItem(STORAGE_KEY)
@@ -50,7 +63,9 @@ function saveAndRegister(geoJSON) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(geoJSON))
   } catch (e) { /* localStorage 可能满了 */ }
-  echarts.registerMap('china', geoJSON)
+  if (!isMapRegistered()) {
+    echarts.registerMap('china', geoJSON)
+  }
 }
 
 function sleep(ms) {

@@ -57,7 +57,7 @@ import ErrorDisplay from './ErrorDisplay.vue'
 const mockData = inject('mockData')
 const { debounce } = useInteraction({ debounceMs: 300 })
 
-const selectedProvince = ref(null)
+const selectedProvince = computed(() => mockData.selectedProvince.value)
 const isPaused = ref(false)
 const scrollOffset = ref(0)
 let rafId = null
@@ -123,7 +123,11 @@ function resumeScroll() {
 }
 
 const selectRow = debounce((item) => {
-  selectedProvince.value = selectedProvince.value === item.name ? null : item.name
+  if (selectedProvince.value === item.name) {
+    mockData.clearSelection()
+  } else {
+    mockData.selectProvince(item.name)
+  }
 })
 
 function onRetry() {
