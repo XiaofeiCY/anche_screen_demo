@@ -1,5 +1,9 @@
 <template>
-  <div class="china-map-container">
+  <div
+    class="china-map-container"
+    @mouseenter="onMapHover"
+    @mouseleave="onMapLeave"
+  >
     <!-- 星云粒子背景层 — 渲染在 ECharts 下方 -->
     <MapNebula v-if="!loading && !hasError" />
 
@@ -21,25 +25,26 @@
       :option="chartOption"
       :autoresize="true"
       @click="onMapClick"
-      @zr:mouseover="onMapHover"
-      @zr:mouseout="onMapLeave"
     />
+
+    <!-- 省份详情面板 -->
+    <ProvinceDetail :province="detailProvince" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, inject } from 'vue'
+import { ref, computed, onMounted, onUnmounted, inject, watch } from 'vue'
 import VChart from 'vue-echarts'
 import { loadChinaGeoJSON } from '../utils/geoJSONLoader.js'
 import SkeletonLoader from './SkeletonLoader.vue'
 import ErrorDisplay from './ErrorDisplay.vue'
 import MapNebula from './MapNebula.vue'
+import ProvinceDetail from './ProvinceDetail.vue'
 
 const mockData = inject('mockData')
 const chartRef = ref(null)
 const loading = ref(true)
 const mapError = ref(null)
-const borderAlpha = ref(0.35)
 let carouselTimer = null
 let currentCarouselIndex = 0
 let breatheTimer = null
@@ -48,6 +53,11 @@ const hasError = computed(() => !!mapError.value)
 const errorMsg = computed(() => mapError.value || '地图加载失败')
 
 const provinceStats = computed(() => mockData.provinceStats.value || [])
+const selectedProvince = computed(() => mockData.selectedProvince.value)
+const detailProvince = computed(() => {
+  if (!selectedProvince.value || !provinceStats.value) return null
+  return provinceStats.value.find(p => p.name === selectedProvince.value) || null
+})
 
 // 地图数据
 const mapData = computed(() =>
@@ -148,9 +158,9 @@ const chartOption = computed(() => ({
     layoutSize: '100%',
     itemStyle: {
       areaColor: '#020f1e',
-      borderColor: `rgba(0, 180, 220, ${borderAlpha.value})`,
+      borderColor: `rgba(0, 180, 220, 0.35)`,
       borderWidth: 1,
-      shadowColor: `rgba(0, 212, 255, ${borderAlpha.value * 0.8})`,
+      shadowColor: `rgba(0, 212, 255, 0.28)`,
       shadowOffsetX: 0,
       shadowOffsetY: 8,
       shadowBlur: 20
@@ -184,7 +194,7 @@ const chartOption = computed(() => ({
       geoIndex: 0,
       itemStyle: {
         areaColor: '#0d2a50',
-        borderColor: `rgba(0, 180, 220, ${borderAlpha.value + 0.15})`,
+        borderColor: `rgba(0, 180, 220, 0.50)`,
         borderWidth: 1
       },
       emphasis: {
@@ -291,39 +301,62 @@ function stopCarousel() {
 }
 
 function onMapClick(params) {
-  if (!params.data) {
-    chartRef.value?.dispatchAction({ type: 'unselect', seriesIndex: 0 })
+  // 获取省份名
+  const name = params.name || params.data?.name
+  if (!name) {
+    // 点击空白区域 → 返回全国
+    if (selectedProvince.value) {
+      mockData.clearSelection()
+    }
+    return
   }
+  // 点击已选中省份 → 取消选中
+  if (selectedProvince.value === name) {
+    mockData.clearSelection()
+    return
+  }
+  // 点击省份 → 选中/下钻
+  mockData.selectProvince(name)
+  stopCarousel()
 }
 
 const isHovering = ref(false)
 
 function onMapHover() {
   isHovering.value = true
-  stopCarousel()
+  if (!selectedProvince.value) stopCarousel()
 }
 function onMapLeave() {
   isHovering.value = false
-  startCarousel()
+  if (!selectedProvince.value) startCarousel()
 }
+
+// 同步 selectedProvince → ECharts 选中态
+watch(selectedProvince, (name) => {
+  if (!chartRef.value) return
+  if (name) {
+    chartRef.value.dispatchAction({ type: 'select', seriesIndex: 0, name })
+  } else {
+    chartRef.value.dispatchAction({ type: 'unselect', seriesIndex: 0 })
+  }
+})
 
 function startBorderBreathe() {
   stopBorderBreathe()
   let phase = 0
   breatheTimer = setInterval(() => {
+    if (isHovering.value || !chartRef.value) return
     phase += 0.03
-    borderAlpha.value = 0.25 + 0.2 * (0.5 + 0.5 * Math.sin(phase))
-    if (chartRef.value && !isHovering.value) {
-      chartRef.value.setOption({
-        geo: {
-          itemStyle: { borderColor: `rgba(0, 180, 220, ${borderAlpha.value})` }
-        },
-        series: [{
-          itemStyle: { borderColor: `rgba(0, 180, 220, ${borderAlpha.value + 0.15})` }
-        }]
-      })
-    }
-  }, 50)
+    const alpha = 0.25 + 0.2 * (0.5 + 0.5 * Math.sin(phase))
+    chartRef.value.setOption({
+      geo: {
+        itemStyle: { borderColor: `rgba(0, 180, 220, ${alpha})` }
+      },
+      series: [{
+        itemStyle: { borderColor: `rgba(0, 180, 220, ${alpha + 0.15})` }
+      }]
+    })
+  }, 100)
 }
 
 function stopBorderBreathe() {
@@ -378,3 +411,4 @@ onUnmounted(() => {
   cursor: pointer;
 }
 </style>
+

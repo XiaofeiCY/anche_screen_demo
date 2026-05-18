@@ -1,5 +1,9 @@
 <template>
-  <div class="china-map-3d-container">
+  <div
+    class="china-map-3d-container"
+    @mouseenter="onMapHover"
+    @mouseleave="onMapLeave"
+  >
     <!-- 星云粒子背景层 -->
     <MapNebula v-if="!loading && !hasError" />
 
@@ -20,38 +24,29 @@
       class="china-map-3d-chart"
       :option="chartOption"
       :autoresize="true"
-      :echarts="echarts"
       @click="onMapClick"
-      @zr:mouseover="onMapHover"
-      @zr:mouseout="onMapLeave"
     />
 
-    <!-- 返回全国按钮（省份选中时显示） -->
-    <button
-      v-if="selectedProvince"
-      class="return-btn"
-      @click="returnToNational"
-    >
-      ← 返回全国
-    </button>
+    <!-- 省份详情面板 -->
+    <ProvinceDetail :province="detailProvince" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, inject, watch } from 'vue'
-import * as echarts from 'echarts'
 import 'echarts-gl'
 import VChart from 'vue-echarts'
 import { loadChinaGeoJSON } from '../utils/geoJSONLoader.js'
 import SkeletonLoader from './SkeletonLoader.vue'
 import ErrorDisplay from './ErrorDisplay.vue'
 import MapNebula from './MapNebula.vue'
+import ProvinceDetail from './ProvinceDetail.vue'
 
 const mockData = inject('mockData')
 const chartRef = ref(null)
 const loading = ref(true)
 const mapError = ref(null)
-const borderAlpha = ref(0.35)
+const carouselProvince = ref(null)
 let carouselTimer = null
 let currentCarouselIndex = 0
 let breatheTimer = null
@@ -61,8 +56,11 @@ const errorMsg = computed(() => mapError.value || '地图加载失败')
 
 const provinceStats = computed(() => mockData.provinceStats.value || [])
 const selectedProvince = computed(() => mockData.selectedProvince.value)
+const detailProvince = computed(() => {
+  if (!selectedProvince.value || !provinceStats.value) return null
+  return provinceStats.value.find(p => p.name === selectedProvince.value) || null
+})
 
-const CHINA_CENTER = [104.5, 35.5]
 const DRILL_DISTANCE = 60
 const DEFAULT_DISTANCE = 140
 
@@ -110,17 +108,6 @@ const provinceNames = computed(() =>
     .map(p => p.name)
 )
 
-const mapData = computed(() =>
-  provinceStats.value
-    .filter(p => p.activeSites > 0)
-    .map(p => ({
-      name: p.name,
-      value: p.activeSites,
-      activeSites: p.activeSites,
-      onlineSites: p.onlineSites
-    }))
-)
-
 const scatterData = computed(() => {
   const top8 = [...provinceStats.value]
     .sort((a, b) => b.activeSites - a.activeSites)
@@ -145,44 +132,61 @@ const linesData = computed(() => {
     }))
 })
 
-const geoRegions = computed(() => {
-  if (!selectedProvince.value) return []
+const map3DData = computed(() => {
+  const activeName = selectedProvince.value || carouselProvince.value
+  if (!activeName) return provinceStats.value
+    .filter(p => p.activeSites > 0)
+    .map(p => ({ name: p.name, value: p.activeSites }))
   return provinceStats.value
     .filter(p => p.activeSites > 0)
-    .map(p => ({
-      name: p.name,
-      height: p.name === selectedProvince.value ? 14 : 1,
-      itemStyle: {
-        opacity: p.name === selectedProvince.value ? 1 : 0.18
+    .map(p => {
+      const isActive = p.name === activeName
+      return {
+        name: p.name,
+        value: p.activeSites,
+        height: isActive ? 14 : 1,
+        itemStyle: {
+          color: isActive ? '#1a6090' : '#0d2a50',
+          borderColor: isActive ? '#00d4ff' : 'rgba(0, 180, 220, 0.35)',
+          borderWidth: isActive ? 2 : 1,
+          opacity: isActive ? 1 : (selectedProvince.value ? 0.18 : 0.68)
+        }
       }
-    }))
-})
-
-const viewCenter = computed(() => {
-  if (selectedProvince.value && PROVINCE_CENTERS[selectedProvince.value]) {
-    return PROVINCE_CENTERS[selectedProvince.value]
-  }
-  return CHINA_CENTER
+    })
 })
 
 const viewDistance = computed(() => {
   return selectedProvince.value ? DRILL_DISTANCE : DEFAULT_DISTANCE
 })
 
-const chartOption = computed(() => {
-  // 暂时最简配置：只用 geo3D 渲染基础地图
-  return {
-    backgroundColor: 'transparent',
+const chartOption = computed(() => ({
+  backgroundColor: 'transparent',
 
-    tooltip: {
-      trigger: 'item',
-      backgroundColor: 'rgba(2, 11, 22, 0.9)',
-      borderColor: 'rgba(0, 212, 255, 0.4)',
-      textStyle: { color: '#e0e6ed', fontSize: 13 }
-    },
+  tooltip: {
+    trigger: 'item',
+    backgroundColor: 'rgba(2, 11, 22, 0.9)',
+    borderColor: 'rgba(0, 212, 255, 0.4)',
+    textStyle: { color: '#e0e6ed', fontSize: 13 }
+  },
 
-    geo3D: {
+  // geo3D 仅作坐标系（不渲染视觉、不接管交互）
+  geo3D: {
+    map: 'china',
+    show: false,
+    viewControl: {
+      rotateSensitivity: 0,
+      panSensitivity: 0,
+      zoomSensitivity: 0,
+      autoRotate: false
+    }
+  },
+
+  series: [
+    // map3D 作为唯一视觉层 + 点击事件源 + 视图交互
+    {
+      type: 'map3D',
       map: 'china',
+      data: map3DData.value,
       regionHeight: 2,
       shading: 'color',
       viewControl: {
@@ -192,7 +196,7 @@ const chartOption = computed(() => {
         distance: viewDistance.value,
         alpha: 35,
         beta: 0,
-        center: viewCenter.value,
+        center: [0, 0, 0],
         animation: true,
         animationDurationUpdate: 1200,
         animationEasingUpdate: 'cubicInOut'
@@ -206,13 +210,13 @@ const chartOption = computed(() => {
         color: '#010a18'
       },
       itemStyle: {
-        areaColor: '#0d2a50',
-        borderColor: `rgba(0, 180, 220, ${borderAlpha.value})`,
+        color: '#0d2a50',
+        borderColor: 'rgba(0, 180, 220, 0.35)',
         borderWidth: 1
       },
       emphasis: {
         itemStyle: {
-          areaColor: '#1a6090',
+          color: '#1a6090',
           borderColor: '#00d4ff',
           borderWidth: 2
         }
@@ -221,44 +225,40 @@ const chartOption = computed(() => {
         show: true,
         color: 'rgba(200, 220, 240, 0.65)',
         fontSize: 10
-      },
-      regions: geoRegions.value
-    },
-
-    series: [
-      {
-        type: 'scatter3D',
-        coordinateSystem: 'geo3D',
-        data: scatterData.value,
-        symbol: 'circle',
-        symbolSize: 8,
-        itemStyle: { color: '#00d4ff' },
-        zlevel: 1
-      },
-      {
-        type: 'lines3D',
-        coordinateSystem: 'geo3D',
-        polyline: false,
-        blendMode: 'lighter',
-        effect: {
-          show: true,
-          period: 4,
-          trailWidth: 2,
-          trailLength: 0.3,
-          trailColor: '#00d4ff',
-          trailOpacity: 0.6
-        },
-        lineStyle: {
-          color: '#00d4ff',
-          width: 1,
-          opacity: 0.5
-        },
-        data: linesData.value,
-        zlevel: 1
       }
-    ]
-  }
-})
+    },
+    {
+      type: 'scatter3D',
+      coordinateSystem: 'geo3D',
+      data: scatterData.value,
+      symbol: 'circle',
+      symbolSize: 8,
+      itemStyle: { color: '#00d4ff' },
+      zlevel: 1
+    },
+    {
+      type: 'lines3D',
+      coordinateSystem: 'geo3D',
+      polyline: false,
+      blendMode: 'lighter',
+      effect: {
+        show: true,
+        period: 4,
+        trailWidth: 2,
+        trailLength: 0.3,
+        trailColor: '#00d4ff',
+        trailOpacity: 0.6
+      },
+      lineStyle: {
+        color: '#00d4ff',
+        width: 1,
+        opacity: 0.5
+      },
+      data: linesData.value,
+      zlevel: 1
+    }
+  ]
+}))
 
 // 地图交互事件
 function onMapClick(params) {
@@ -285,55 +285,52 @@ function returnToNational() {
   startCarousel()
 }
 
-function onMapHover() { stopCarousel() }
+const isHovering = ref(false)
+
+function onMapHover() {
+  isHovering.value = true
+  stopCarousel()
+}
 function onMapLeave() {
+  isHovering.value = false
   if (!selectedProvince.value) startCarousel()
 }
 
-// 轮播高亮（geo3D 用 dispatchAction 模拟）
+// 轮播高亮通过 regions 响应式更新，避免 geo3D dispatchAction 在 GL 初始化期抛错
 function startCarousel() {
   stopCarousel()
   const provinces = provinceNames.value
   if (provinces.length === 0) return
 
-  carouselTimer = setInterval(() => {
-    if (!chartRef.value || selectedProvince.value) return
-    // geo3D 的 highlight/downplay 通过 componentType 触发
-    if (currentCarouselIndex > 0) {
-      chartRef.value.dispatchAction({
-        type: 'downplay',
-        componentType: 'geo3D',
-        name: provinces[currentCarouselIndex - 1]
-      })
-    }
-    chartRef.value.dispatchAction({
-      type: 'highlight',
-      componentType: 'geo3D',
-      name: provinces[currentCarouselIndex]
-    })
+  const advanceCarousel = () => {
+    if (selectedProvince.value) return
+    carouselProvince.value = provinces[currentCarouselIndex]
     currentCarouselIndex = (currentCarouselIndex + 1) % provinces.length
-  }, 3000)
+  }
+
+  advanceCarousel()
+  carouselTimer = setInterval(advanceCarousel, 3000)
 }
 
 function stopCarousel() {
   if (carouselTimer) { clearInterval(carouselTimer); carouselTimer = null }
+  carouselProvince.value = null
 }
 
-// 边界呼吸辉光
+// 边界呼吸辉光 — 直接 setOption 局部更新，不参与 chartOption computed 反应链路
 function startBorderBreathe() {
   stopBorderBreathe()
   let phase = 0
   breatheTimer = setInterval(() => {
+    if (isHovering.value || selectedProvince.value || !chartRef.value) return
     phase += 0.03
-    borderAlpha.value = 0.25 + 0.2 * (0.5 + 0.5 * Math.sin(phase))
-    if (chartRef.value) {
-      chartRef.value.setOption({
-        geo3D: {
-          itemStyle: { borderColor: `rgba(0, 180, 220, ${borderAlpha.value})` }
-        }
-      })
-    }
-  }, 50)
+    const alpha = 0.25 + 0.2 * (0.5 + 0.5 * Math.sin(phase))
+    chartRef.value.setOption({
+      series: [{
+        itemStyle: { borderColor: `rgba(0, 180, 220, ${alpha})` }
+      }]
+    })
+  }, 150)
 }
 
 function stopBorderBreathe() {
@@ -396,29 +393,4 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-.return-btn {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 2;
-  padding: 6px 16px;
-  font-size: 13px;
-  font-family: 'Orbitron', 'Consolas', 'Monaco', monospace;
-  color: #00d4ff;
-  background: rgba(2, 11, 22, 0.85);
-  border: 1px solid rgba(0, 212, 255, 0.5);
-  border-radius: 4px;
-  cursor: pointer;
-  text-shadow: 0 0 6px #00d4ff;
-  box-shadow: 0 0 12px rgba(0, 212, 255, 0.2), inset 0 0 8px rgba(0, 212, 255, 0.05);
-  transition: all 0.3s ease;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-
-.return-btn:hover {
-  border-color: #00d4ff;
-  box-shadow: 0 0 20px rgba(0, 212, 255, 0.4), inset 0 0 12px rgba(0, 212, 255, 0.1);
-  text-shadow: 0 0 12px #00d4ff;
-}
 </style>
