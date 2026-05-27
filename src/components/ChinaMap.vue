@@ -48,6 +48,7 @@ const mapError = ref(null)
 let carouselTimer = null
 let currentCarouselIndex = 0
 let breatheTimer = null
+let checkReadyTimer = null
 
 const hasError = computed(() => !!mapError.value)
 const errorMsg = computed(() => mapError.value || '地图加载失败')
@@ -377,10 +378,10 @@ async function loadMap() {
 
 onMounted(() => {
   loadMap()
-  // Start border breathing once chart is ready
-  const checkReady = setInterval(() => {
+  checkReadyTimer = setInterval(() => {
     if (chartRef.value && !loading.value) {
-      clearInterval(checkReady)
+      clearInterval(checkReadyTimer)
+      checkReadyTimer = null
       startBorderBreathe()
       startCarousel()
     }
@@ -390,6 +391,7 @@ onMounted(() => {
 onUnmounted(() => {
   stopCarousel()
   stopBorderBreathe()
+  if (checkReadyTimer) { clearInterval(checkReadyTimer); checkReadyTimer = null }
 })
 </script>
 

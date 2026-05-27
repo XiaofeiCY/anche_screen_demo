@@ -8,6 +8,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 const canvasRef = ref(null)
 let rafId = null
 let particles = []
+let onResize = null
 const PARTICLE_COUNT = 50
 
 class Particle {
@@ -42,12 +43,12 @@ function init() {
   if (!canvas) return
   const ctx = canvas.getContext('2d')
 
-  const resize = () => {
+  onResize = () => {
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
   }
-  resize()
-  window.addEventListener('resize', resize)
+  onResize()
+  window.addEventListener('resize', onResize)
 
   // 创建粒子
   particles = Array.from({ length: PARTICLE_COUNT },
@@ -89,6 +90,7 @@ onMounted(() => init())
 
 onUnmounted(() => {
   if (rafId) cancelAnimationFrame(rafId)
+  if (onResize) window.removeEventListener('resize', onResize)
   particles = []
 })
 </script>

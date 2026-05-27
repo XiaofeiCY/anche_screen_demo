@@ -48,6 +48,7 @@
         @click="onCardClick"
       />
     </template>
+
   </div>
 </template>
 

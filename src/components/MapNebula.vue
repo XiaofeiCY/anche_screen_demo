@@ -9,6 +9,7 @@ const nebulaCanvas = ref(null)
 let rafId = null
 let dustParticles = []
 let flowParticles = []
+let resizeObserver = null
 const DUST_COUNT = 80
 const FLOW_COUNT = 15
 
@@ -105,8 +106,8 @@ function init() {
     flowParticles = Array.from({ length: FLOW_COUNT }, () => new FlowParticle(canvas.width, canvas.height))
   }
   resize()
-  const observer = new ResizeObserver(resize)
-  observer.observe(canvas.parentElement)
+  resizeObserver = new ResizeObserver(resize)
+  resizeObserver.observe(canvas.parentElement)
 
   let startTime = performance.now()
   function animate(now) {
@@ -143,6 +144,7 @@ onMounted(() => init())
 
 onUnmounted(() => {
   if (rafId) cancelAnimationFrame(rafId)
+  if (resizeObserver) resizeObserver.disconnect()
   dustParticles = []
   flowParticles = []
 })
