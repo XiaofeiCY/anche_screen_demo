@@ -34,8 +34,13 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, inject, watch } from 'vue'
-import 'echarts-gl'
 import VChart from 'vue-echarts'
+
+let echartsGL = null
+async function ensureEchartsGL() {
+  if (!echartsGL) echartsGL = await import('echarts-gl')
+  return echartsGL
+}
 import { loadChinaGeoJSON } from '../utils/geoJSONLoader.js'
 import SkeletonLoader from './SkeletonLoader.vue'
 import ErrorDisplay from './ErrorDisplay.vue'
@@ -50,6 +55,7 @@ const carouselProvince = ref(null)
 let carouselTimer = null
 let currentCarouselIndex = 0
 let breatheTimer = null
+let checkReadyTimer = null
 
 const hasError = computed(() => !!mapError.value)
 const errorMsg = computed(() => mapError.value || '地图加载失败')
@@ -111,24 +117,12 @@ const provinceNames = computed(() =>
 const scatterData = computed(() => {
   const top8 = [...provinceStats.value]
     .sort((a, b) => b.activeSites - a.activeSites)
-    .slice(0, 8)
+    .slice(0, 5)
   return top8
     .filter(p => PROVINCE_CENTERS[p.name])
     .map(p => ({
       name: p.name,
       value: [...PROVINCE_CENTERS[p.name], p.activeSites]
-    }))
-})
-
-const linesData = computed(() => {
-  const top5 = [...provinceStats.value]
-    .sort((a, b) => b.activeSites - a.activeSites)
-    .slice(0, 5)
-  const beijing = [116.40, 39.90]
-  return top5
-    .filter(p => PROVINCE_CENTERS[p.name])
-    .map(p => ({
-      coords: [PROVINCE_CENTERS[p.name], beijing]
     }))
 })
 
@@ -144,7 +138,6 @@ const map3DData = computed(() => {
       return {
         name: p.name,
         value: p.activeSites,
-        height: isActive ? 14 : 1,
         itemStyle: {
           color: isActive ? '#1a6090' : '#0d2a50',
           borderColor: isActive ? '#00d4ff' : 'rgba(0, 180, 220, 0.35)',
@@ -166,7 +159,17 @@ const chartOption = computed(() => ({
     trigger: 'item',
     backgroundColor: 'rgba(2, 11, 22, 0.9)',
     borderColor: 'rgba(0, 212, 255, 0.4)',
-    textStyle: { color: '#e0e6ed', fontSize: 13 }
+    textStyle: { color: '#e0e6ed', fontSize: 13 },
+    formatter: (params) => {
+      if (params.seriesIndex !== 0) return ''
+      const stats = provinceStats.value.find(p => p.name === params.name)
+      if (!stats) return `<strong>${params.name}</strong>`
+      return `<div style="padding:4px 8px">
+        <strong style="font-size:14px">${stats.name}</strong><br/>
+        <span style="color:#00d4ff">活跃站点：</span>${stats.activeSites ?? '--'}<br/>
+        <span style="color:#00d4ff">上线站点：</span>${stats.onlineSites ?? '--'}
+      </div>`
+    }
   },
 
   // geo3D 仅作坐标系（不渲染视觉、不接管交互）
@@ -191,8 +194,8 @@ const chartOption = computed(() => ({
       shading: 'color',
       viewControl: {
         projection: 'perspective',
-        autoRotate: !selectedProvince.value,
-        autoRotateSpeed: 6,
+        autoRotate: false,
+        autoRotateSpeed: 2,
         distance: viewDistance.value,
         alpha: 35,
         beta: 0,
@@ -206,8 +209,7 @@ const chartOption = computed(() => ({
         ambient: { intensity: 0.7 }
       },
       groundPlane: {
-        show: true,
-        color: '#010a18'
+        show: false
       },
       itemStyle: {
         color: '#0d2a50',
@@ -224,7 +226,7 @@ const chartOption = computed(() => ({
       label: {
         show: true,
         color: 'rgba(200, 220, 240, 0.65)',
-        fontSize: 10
+        fontSize: 8
       }
     },
     {
@@ -232,31 +234,10 @@ const chartOption = computed(() => ({
       coordinateSystem: 'geo3D',
       data: scatterData.value,
       symbol: 'circle',
-      symbolSize: 8,
+      symbolSize: 5,
       itemStyle: { color: '#00d4ff' },
       zlevel: 1
     },
-    {
-      type: 'lines3D',
-      coordinateSystem: 'geo3D',
-      polyline: false,
-      blendMode: 'lighter',
-      effect: {
-        show: true,
-        period: 4,
-        trailWidth: 2,
-        trailLength: 0.3,
-        trailColor: '#00d4ff',
-        trailOpacity: 0.6
-      },
-      lineStyle: {
-        color: '#00d4ff',
-        width: 1,
-        opacity: 0.5
-      },
-      data: linesData.value,
-      zlevel: 1
-    }
   ]
 }))
 
@@ -340,6 +321,7 @@ function stopBorderBreathe() {
 async function loadMap() {
   loading.value = true
   mapError.value = null
+  await ensureEchartsGL()
   const result = await loadChinaGeoJSON()
   if (!result.success) {
     mapError.value = result.error
@@ -360,10 +342,10 @@ watch(selectedProvince, (val) => {
 
 onMounted(() => {
   loadMap()
-  const checkReady = setInterval(() => {
+  checkReadyTimer = setInterval(() => {
     if (chartRef.value && !loading.value) {
-      clearInterval(checkReady)
-      startBorderBreathe()
+      clearInterval(checkReadyTimer)
+      checkReadyTimer = null
       startCarousel()
     }
   }, 200)
@@ -372,6 +354,7 @@ onMounted(() => {
 onUnmounted(() => {
   stopCarousel()
   stopBorderBreathe()
+  if (checkReadyTimer) { clearInterval(checkReadyTimer); checkReadyTimer = null }
 })
 </script>
 
