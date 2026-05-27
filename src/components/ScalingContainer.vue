@@ -10,14 +10,23 @@
 import { computed } from 'vue'
 import { useScaling } from '../composables/useScaling.js'
 
-const { scale } = useScaling(1920, 1080)
+const props = defineProps({
+  mode: { type: String, default: 'none' }
+})
 
-const contentStyle = computed(() => ({
-  width: '1920px',
-  height: '1080px',
-  transform: `scale(${scale.value})`,
-  transformOrigin: 'center center'
-}))
+const { scale } = useScaling(1920, 1080, props.mode)
+
+const contentStyle = computed(() => {
+  if (props.mode === 'none') {
+    return { width: '100%', height: '100%' }
+  }
+  return {
+    width: '1920px',
+    height: '1080px',
+    transform: `scale(${scale.value})`,
+    transformOrigin: 'center center'
+  }
+})
 </script>
 
 <style scoped>
@@ -25,7 +34,7 @@ const contentStyle = computed(() => ({
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: var(--bg-primary);
+  background: var(--bg-deep);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -33,6 +42,5 @@ const contentStyle = computed(() => ({
 
 .scaling-content {
   flex-shrink: 0;
-  will-change: transform;
 }
 </style>

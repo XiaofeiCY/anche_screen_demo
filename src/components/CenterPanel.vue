@@ -23,9 +23,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, defineAsyncComponent } from 'vue'
 import ChinaMap from './ChinaMap.vue'
-import ChinaMap3D from './ChinaMap3D.vue'
+
+const ChinaMap3D = defineAsyncComponent(() => import('./ChinaMap3D.vue'))
 
 const mapMode = ref('2d')
 </script>

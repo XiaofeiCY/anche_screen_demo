@@ -20,8 +20,8 @@ import RightPanel from './RightPanel.vue'
   grid-template-columns: 1fr 2fr 1.4fr;
   grid-template-rows: auto 1fr;
   gap: 0.5vw;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   padding: 0.5vw;
   box-sizing: border-box;
 }

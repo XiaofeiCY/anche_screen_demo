@@ -50,6 +50,7 @@
   /* 边框 */
   --border-glow: rgba(0, 212, 255, 0.2);
   --border-panel: rgba(10, 110, 255, 0.25);
+  --border-subtle: rgba(0, 180, 220, 0.15);
 
   /* 尺寸 */
   --panel-radius: 4px;
