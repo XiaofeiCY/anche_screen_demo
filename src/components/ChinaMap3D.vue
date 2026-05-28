@@ -7,8 +7,17 @@
     <!-- 星云粒子背景层 -->
     <MapNebula v-if="!loading && !hasError" />
 
+    <!-- 广东省视图返回全国按钮 -->
+    <button
+      v-if="mapLevel === 'guangdong' && !loading && !hasError"
+      class="drill-back-btn"
+      @click="returnToNational"
+    >
+      ← 返回全国
+    </button>
+
     <!-- Loading -->
-    <template v-if="loading">
+    <template v-if="loading || guangdongLoading">
       <SkeletonLoader type="map" />
     </template>
 
@@ -21,14 +30,16 @@
     <v-chart
       v-else
       ref="chartRef"
+      :key="mapLevel"
       class="china-map-3d-chart"
-      :option="chartOption"
+      :option="currentChartOption"
       :autoresize="true"
+      :update-options="{ notMerge: true }"
       @click="onMapClick"
     />
 
-    <!-- 省份详情面板 -->
-    <ProvinceDetail :province="detailProvince" />
+    <!-- 省份/城市详情面板 -->
+    <ProvinceDetail :province="detailTarget" />
   </div>
 </template>
 
@@ -41,7 +52,8 @@ async function ensureEchartsGL() {
   if (!echartsGL) echartsGL = await import('echarts-gl')
   return echartsGL
 }
-import { loadChinaGeoJSON } from '../utils/geoJSONLoader.js'
+import { loadChinaGeoJSON, loadProvinceGeoJSON } from '../utils/geoJSONLoader.js'
+import { guangdongCities } from '../mock/guangdongCityData.js'
 import SkeletonLoader from './SkeletonLoader.vue'
 import ErrorDisplay from './ErrorDisplay.vue'
 import MapNebula from './MapNebula.vue'
@@ -57,18 +69,35 @@ let currentCarouselIndex = 0
 let breatheTimer = null
 let checkReadyTimer = null
 
+// 下钻状态
+const mapLevel = ref('country')
+const selectedCity = ref(null)
+const guangdongLoaded = ref(false)
+const guangdongLoading = ref(false)
+const cityCarouselCity = ref(null)
+let cityCarouselTimer = null
+let cityCarouselIndex = 0
+
 const hasError = computed(() => !!mapError.value)
 const errorMsg = computed(() => mapError.value || '地图加载失败')
 
 const provinceStats = computed(() => mockData.provinceStats.value || [])
 const selectedProvince = computed(() => mockData.selectedProvince.value)
-const detailProvince = computed(() => {
+
+// 统一详情目标
+const detailTarget = computed(() => {
+  if (mapLevel.value === 'guangdong') {
+    if (!selectedCity.value) return null
+    return guangdongCities.find(c => c.name === selectedCity.value) || null
+  }
   if (!selectedProvince.value || !provinceStats.value) return null
   return provinceStats.value.find(p => p.name === selectedProvince.value) || null
 })
 
 const DRILL_DISTANCE = 60
 const DEFAULT_DISTANCE = 140
+const GD_DEFAULT_DISTANCE = 160
+
 
 // 34 省份质心/省会坐标
 const PROVINCE_CENTERS = {
@@ -114,11 +143,13 @@ const provinceNames = computed(() =>
     .map(p => p.name)
 )
 
+// ========== 全国视图 ==========
+
 const scatterData = computed(() => {
-  const top8 = [...provinceStats.value]
+  const top5 = [...provinceStats.value]
     .sort((a, b) => b.activeSites - a.activeSites)
     .slice(0, 5)
-  return top8
+  return top5
     .filter(p => PROVINCE_CENTERS[p.name])
     .map(p => ({
       name: p.name,
@@ -152,7 +183,7 @@ const viewDistance = computed(() => {
   return selectedProvince.value ? DRILL_DISTANCE : DEFAULT_DISTANCE
 })
 
-const chartOption = computed(() => ({
+const nationalChartOption = computed(() => ({
   backgroundColor: 'transparent',
 
   tooltip: {
@@ -172,7 +203,6 @@ const chartOption = computed(() => ({
     }
   },
 
-  // geo3D 仅作坐标系（不渲染视觉、不接管交互）
   geo3D: {
     map: 'china',
     show: false,
@@ -185,7 +215,6 @@ const chartOption = computed(() => ({
   },
 
   series: [
-    // map3D 作为唯一视觉层 + 点击事件源 + 视图交互
     {
       type: 'map3D',
       map: 'china',
@@ -237,20 +266,135 @@ const chartOption = computed(() => ({
       symbolSize: 5,
       itemStyle: { color: '#00d4ff' },
       zlevel: 1
-    },
+    }
   ]
 }))
 
-// 地图交互事件
+// ========== 广东省视图 ==========
+
+const cityMapData = computed(() => {
+  const activeName = selectedCity.value || cityCarouselCity.value
+  return guangdongCities.map(city => {
+    const isActive = city.name === activeName
+    return {
+      name: city.name,
+      value: city.activeSites,
+      itemStyle: {
+        color: isActive ? '#1a6090' : '#0d2a50',
+        borderColor: isActive ? '#00d4ff' : 'rgba(0, 180, 220, 0.35)',
+        borderWidth: isActive ? 2 : 1,
+        opacity: isActive ? 1 : (selectedCity.value ? 0.18 : 0.68)
+      }
+    }
+  })
+})
+
+const cityViewDistance = computed(() => {
+  return GD_DEFAULT_DISTANCE
+})
+
+
+const guangdongChartOption = computed(() => ({
+  backgroundColor: 'transparent',
+
+  tooltip: {
+    trigger: 'item',
+    backgroundColor: 'rgba(2, 11, 22, 0.9)',
+    borderColor: 'rgba(0, 212, 255, 0.4)',
+    textStyle: { color: '#e0e6ed', fontSize: 13 },
+    formatter: (params) => {
+      if (params.seriesIndex !== 0) return ''
+      const city = guangdongCities.find(c => c.name === params.name)
+      if (!city) return `<strong>${params.name}</strong>`
+      return `<div style="padding:4px 8px">
+        <strong style="font-size:14px">${city.name}</strong><br/>
+        <span style="color:#00d4ff">活跃站点：</span>${city.activeSites}<br/>
+        <span style="color:#00d4ff">上线站点：</span>${city.onlineSites}<br/>
+        <span style="color:#00d4ff">订单数：</span>${city.orderCount.toLocaleString()}<br/>
+        <span style="color:#00d4ff">订单金额：</span>¥${city.orderAmount.toLocaleString()}
+      </div>`
+    }
+  },
+
+  geo3D: {
+    map: 'guangdong',
+    show: false,
+    viewControl: {
+      rotateSensitivity: 0,
+      panSensitivity: 0,
+      zoomSensitivity: 0,
+      autoRotate: false
+    }
+  },
+
+  series: [
+    {
+      type: 'map3D',
+      map: 'guangdong',
+      data: cityMapData.value,
+      regionHeight: 1.5,
+      shading: 'color',
+      viewControl: {
+        projection: 'perspective',
+        autoRotate: false,
+        autoRotateSpeed: 2,
+        distance: cityViewDistance.value,
+        alpha: 75,
+        beta: 0,
+        center: [0, 0, 0],
+        animation: true,
+        animationDurationUpdate: 1200,
+        animationEasingUpdate: 'cubicInOut'
+      },
+      light: {
+        main: { intensity: 1.2, shadow: false, alpha: 40, beta: 10 },
+        ambient: { intensity: 0.7 }
+      },
+      groundPlane: {
+        show: false
+      },
+      itemStyle: {
+        color: '#0d2a50',
+        borderColor: 'rgba(0, 180, 220, 0.35)',
+        borderWidth: 1
+      },
+      emphasis: {
+        itemStyle: {
+          color: '#1a6090',
+          borderColor: '#00d4ff',
+          borderWidth: 2
+        }
+      },
+      label: {
+        show: true,
+        color: 'rgba(200, 220, 240, 0.65)',
+        fontSize: 9
+      }
+    }
+  ]
+}))
+
+const currentChartOption = computed(() => {
+  return mapLevel.value === 'guangdong' ? guangdongChartOption.value : nationalChartOption.value
+})
+
+// ========== 地图交互 ==========
+
 function onMapClick(params) {
+  if (mapLevel.value === 'guangdong') {
+    handleCityClick(params)
+    return
+  }
+  handleNationalClick(params)
+}
+
+function handleNationalClick(params) {
   if (!params.data && !params.name) {
-    // 点击空白 → 返回全国
     if (selectedProvince.value) {
       returnToNational()
     }
     return
   }
-  // geo3D 点击：params.name 是省份名
   const name = params.name || params.data?.name
   if (!name) return
   if (selectedProvince.value === name) {
@@ -259,38 +403,85 @@ function onMapClick(params) {
   }
   mockData.selectProvince(name)
   stopCarousel()
+
+  if (name === '广东省') {
+    drillToGuangdong()
+  }
+}
+
+function handleCityClick(params) {
+  if (!params.name) {
+    if (selectedCity.value) {
+      selectedCity.value = null
+      startCityCarousel()
+    }
+    return
+  }
+  const name = params.name
+  if (selectedCity.value === name) {
+    selectedCity.value = null
+    startCityCarousel()
+    return
+  }
+  selectedCity.value = name
+  stopCityCarousel()
+}
+
+async function drillToGuangdong() {
+  if (!guangdongLoaded.value) {
+    guangdongLoading.value = true
+    const result = await loadProvinceGeoJSON('440000', 'guangdong')
+    if (!result.success) {
+      mapError.value = result.error || '广东省地图加载失败'
+      guangdongLoading.value = false
+      return
+    }
+    guangdongLoaded.value = true
+    guangdongLoading.value = false
+  }
+  stopCarousel()
+  mapLevel.value = 'guangdong'
+  startCityCarousel()
 }
 
 function returnToNational() {
   mockData.clearSelection()
-  startCarousel()
 }
 
 const isHovering = ref(false)
 
 function onMapHover() {
   isHovering.value = true
-  stopCarousel()
+  if (mapLevel.value === 'guangdong') {
+    stopCityCarousel()
+  } else {
+    stopCarousel()
+  }
 }
 function onMapLeave() {
   isHovering.value = false
-  if (!selectedProvince.value) startCarousel()
+  if (mapLevel.value === 'guangdong') {
+    if (!selectedCity.value) startCityCarousel()
+  } else {
+    if (!selectedProvince.value) startCarousel()
+  }
 }
 
-// 轮播高亮通过 regions 响应式更新，避免 geo3D dispatchAction 在 GL 初始化期抛错
+// ========== 全国轮播 ==========
+
 function startCarousel() {
   stopCarousel()
   const provinces = provinceNames.value
   if (provinces.length === 0) return
 
-  const advanceCarousel = () => {
+  const advance = () => {
     if (selectedProvince.value) return
     carouselProvince.value = provinces[currentCarouselIndex]
     currentCarouselIndex = (currentCarouselIndex + 1) % provinces.length
   }
 
-  advanceCarousel()
-  carouselTimer = setInterval(advanceCarousel, 3000)
+  advance()
+  carouselTimer = setInterval(advance, 3000)
 }
 
 function stopCarousel() {
@@ -298,12 +489,36 @@ function stopCarousel() {
   carouselProvince.value = null
 }
 
-// 边界呼吸辉光 — 直接 setOption 局部更新，不参与 chartOption computed 反应链路
+// ========== 广东省城市轮播 ==========
+
+function startCityCarousel() {
+  stopCityCarousel()
+  const cities = guangdongCities.map(c => c.name)
+  if (cities.length === 0) return
+
+  const advance = () => {
+    if (selectedCity.value) return
+    cityCarouselCity.value = cities[cityCarouselIndex]
+    cityCarouselIndex = (cityCarouselIndex + 1) % cities.length
+  }
+
+  advance()
+  cityCarouselTimer = setInterval(advance, 3000)
+}
+
+function stopCityCarousel() {
+  if (cityCarouselTimer) { clearInterval(cityCarouselTimer); cityCarouselTimer = null }
+  cityCarouselCity.value = null
+}
+
+// ========== 边界呼吸（仅全国视图） ==========
+
 function startBorderBreathe() {
   stopBorderBreathe()
   let phase = 0
   breatheTimer = setInterval(() => {
     if (isHovering.value || selectedProvince.value || !chartRef.value) return
+    if (mapLevel.value !== 'country') return
     phase += 0.03
     const alpha = 0.25 + 0.2 * (0.5 + 0.5 * Math.sin(phase))
     chartRef.value.setOption({
@@ -318,6 +533,8 @@ function stopBorderBreathe() {
   if (breatheTimer) { clearInterval(breatheTimer); breatheTimer = null }
 }
 
+// ========== 地图加载 ==========
+
 async function loadMap() {
   loading.value = true
   mapError.value = null
@@ -331,13 +548,21 @@ async function loadMap() {
   loading.value = false
 }
 
-// 监听省份选择变化，暂停/恢复轮播
+// ========== 监听器 ==========
+
 watch(selectedProvince, (val) => {
   if (val) {
     stopCarousel()
-  } else {
-    startCarousel()
+    return
   }
+
+  if (mapLevel.value === 'guangdong') {
+    mapLevel.value = 'country'
+    selectedCity.value = null
+    stopCityCarousel()
+  }
+
+  startCarousel()
 })
 
 onMounted(() => {
@@ -354,6 +579,7 @@ onMounted(() => {
 onUnmounted(() => {
   stopCarousel()
   stopBorderBreathe()
+  stopCityCarousel()
   if (checkReadyTimer) { clearInterval(checkReadyTimer); checkReadyTimer = null }
 })
 </script>
@@ -376,4 +602,28 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
+/* 广东省视图返回全国按钮 */
+.drill-back-btn {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  z-index: 3;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-family: 'Orbitron', 'Consolas', 'Monaco', monospace;
+  color: #00d4ff;
+  background: rgba(2, 11, 22, 0.7);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  border-radius: 4px;
+  cursor: pointer;
+  text-shadow: 0 0 6px #00d4ff;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.15);
+  transition: all 0.25s ease;
+  letter-spacing: 1px;
+}
+
+.drill-back-btn:hover {
+  border-color: #00d4ff;
+  box-shadow: 0 0 18px rgba(0, 212, 255, 0.35), inset 0 0 10px rgba(0, 212, 255, 0.08);
+}
 </style>
