@@ -5,14 +5,14 @@
       <button
         class="toggle-btn"
         :class="{ active: mapMode === '2d' }"
-        @click="mapMode = '2d'"
+        @click="switchMode('2d')"
       >
         2D 平面
       </button>
       <button
         class="toggle-btn"
         :class="{ active: mapMode === '3d' }"
-        @click="mapMode = '3d'"
+        @click="switchMode('3d')"
       >
         3D 立体
       </button>
@@ -23,12 +23,19 @@
 </template>
 
 <script setup>
-import { ref, defineAsyncComponent } from 'vue'
+import { ref, defineAsyncComponent, inject } from 'vue'
 import ChinaMap from './ChinaMap.vue'
 
 const ChinaMap3D = defineAsyncComponent(() => import('./ChinaMap3D.vue'))
 
+const mockData = inject('mockData')
+
 const mapMode = ref('2d')
+
+function switchMode(mode) {
+  mockData.clearSelection()
+  mapMode.value = mode
+}
 </script>
 
 <style scoped>
