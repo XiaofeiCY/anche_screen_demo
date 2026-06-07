@@ -17,13 +17,23 @@ import RightPanel from './RightPanel.vue'
 <style scoped>
 .dashboard-layout {
   display: grid;
-  grid-template-columns: 1fr 2fr 1.4fr;
+  grid-template-columns: 0.96fr 2fr 1.36fr;
   grid-template-rows: auto 1fr;
-  gap: 0.5vw;
+  gap: 0.58vw;
   width: 100%;
   height: 100%;
-  padding: 0.5vw;
+  padding: 0.48vw;
   box-sizing: border-box;
+  position: relative;
+}
+
+.dashboard-layout::before {
+  content: '';
+  position: absolute;
+  inset: 0.48vw;
+  pointer-events: none;
+  border: 1px solid rgba(101, 232, 255, 0.08);
+  box-shadow: inset 0 0 70px rgba(36, 120, 255, 0.08);
 }
 
 .layout-header {
