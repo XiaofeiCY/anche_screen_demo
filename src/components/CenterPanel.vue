@@ -1,6 +1,9 @@
 <template>
   <div class="center-panel">
     <div class="center-stage" />
+    <img class="map-platform" src="../assets/images/hud/map-platform.png" alt="" aria-hidden="true" />
+    <img class="map-focus-beacon map-focus-beacon--primary" src="../assets/images/hud/beacon.png" alt="" aria-hidden="true" />
+    <img class="map-focus-beacon map-focus-beacon--secondary" src="../assets/images/hud/beacon.png" alt="" aria-hidden="true" />
     <div class="operation-rail operation-rail--top">
       <span>NODE HEALTH 98.7%</span>
       <span>SYNC 12ms</span>
@@ -101,6 +104,48 @@ function switchMode(mode) {
   filter: blur(0.2px);
   z-index: 0;
   pointer-events: none;
+}
+
+.map-platform {
+  position: absolute;
+  left: 50%;
+  top: 57%;
+  width: min(56vw, 760px);
+  transform: translate(-50%, -50%);
+  opacity: 0.28;
+  mix-blend-mode: screen;
+  filter: saturate(0.9) contrast(1.1);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.map-focus-beacon {
+  position: absolute;
+  width: clamp(44px, 4.8vw, 72px);
+  height: auto;
+  z-index: 2;
+  opacity: 0.72;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: beacon-float 3.2s cubic-bezier(0.32, 0.72, 0, 1) infinite;
+}
+
+.map-focus-beacon--primary {
+  left: 62%;
+  top: 37%;
+}
+
+.map-focus-beacon--secondary {
+  left: 50%;
+  top: 49%;
+  width: clamp(34px, 3.8vw, 58px);
+  opacity: 0.46;
+  animation-delay: 1.1s;
+}
+
+@keyframes beacon-float {
+  0%, 100% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.40; }
+  50% { transform: translate(-50%, -50%) scale(1.08); opacity: 0.78; }
 }
 
 .operation-rail {

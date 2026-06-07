@@ -23,6 +23,9 @@ const isEmpty = computed(() => !mockData.trendData.value)
 const chartOption = computed(() => {
   const data = mockData.trendData.value
   if (!data) return {}
+  const lastIndex = data.categories.length - 1
+  const lastDay = data.categories[lastIndex]
+  const lastCount = data.orderCount[lastIndex]
 
   return {
     tooltip: {
@@ -116,7 +119,44 @@ const chartOption = computed(() => {
           }
         },
         emphasis: { focus: 'series' },
-        yAxisIndex: 1
+        yAxisIndex: 1,
+        markPoint: {
+          symbol: 'circle',
+          symbolSize: 14,
+          data: [
+            {
+              name: '实时',
+              coord: [lastDay, lastCount],
+              value: lastCount,
+              itemStyle: {
+                color: '#ffb84d',
+                shadowBlur: 18,
+                shadowColor: 'rgba(255, 184, 77, 0.62)'
+              },
+              label: {
+                show: true,
+                formatter: 'LIVE',
+                color: '#ffcf83',
+                fontSize: 10,
+                offset: [0, -14]
+              }
+            }
+          ]
+        },
+        markLine: {
+          symbol: 'none',
+          silent: true,
+          data: [{ type: 'max', name: '峰值' }],
+          lineStyle: {
+            color: 'rgba(255, 184, 77, 0.28)',
+            type: 'dashed'
+          },
+          label: {
+            color: '#ffcf83',
+            fontSize: 10,
+            formatter: 'PEAK'
+          }
+        }
       }
     ]
   }
