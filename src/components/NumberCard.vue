@@ -31,11 +31,25 @@
     <!-- Normal state -->
     <template v-else>
       <div class="card-title">{{ title }}</div>
+      <div class="card-meta">
+        <span class="card-status" :class="'is-' + statusTone">{{ status }}</span>
+        <span class="card-delta" :class="{ 'is-negative': numericDelta < 0 }">
+          {{ deltaText }}
+        </span>
+      </div>
       <div class="card-value" @click="handleClick">
         <span class="card-prefix" v-if="prefix">{{ prefix }}</span>
         <span class="card-number">{{ displayText }}</span>
         <span class="card-suffix" v-if="suffix">{{ suffix }}</span>
         <span class="card-phantom">{{ displayText }}</span>
+      </div>
+      <div class="card-sparkline" aria-hidden="true">
+        <span
+          v-for="(point, index) in normalizedTrend"
+          :key="index"
+          class="spark-bar"
+          :style="{ height: point + '%' }"
+        />
       </div>
       <div class="card-glow-bar" />
       <div class="card-scanlines" />
@@ -58,7 +72,10 @@ const props = defineProps({
   suffix: { type: String, default: '' },
   decimals: { type: Number, default: 0 },
   loading: { type: Boolean, default: false },
-  error: { type: String, default: null }
+  error: { type: String, default: null },
+  delta: { type: Number, default: 0 },
+  status: { type: String, default: '稳定' },
+  trend: { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['click'])
@@ -79,6 +96,26 @@ const displayText = computed(() => {
     suffix: '',
     decimals: props.decimals
   })
+})
+
+const numericDelta = computed(() => Number(props.delta) || 0)
+const deltaText = computed(() => {
+  const sign = numericDelta.value >= 0 ? '+' : ''
+  return `${sign}${numericDelta.value.toFixed(1)}%`
+})
+
+const statusTone = computed(() => {
+  if (props.status.includes('关注') || props.status.includes('异常')) return 'warn'
+  if (props.status.includes('高位') || props.status.includes('增长')) return 'hot'
+  return 'stable'
+})
+
+const normalizedTrend = computed(() => {
+  const values = props.trend.length ? props.trend.map(Number) : [42, 48, 45, 58, 62, 68, 72]
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  const range = max - min || 1
+  return values.map(v => 24 + ((v - min) / range) * 62)
 })
 
 // 监听 value 变化触发动画
@@ -182,10 +219,56 @@ function onLeave() { /* leave handled by CSS */ }
 .card-title {
   font-size: clamp(10px, 1.2vh, 13px);
   color: var(--text-secondary);
-  margin-bottom: 0.42vh;
+  margin-bottom: 0.36vh;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 0.12vh;
+  min-height: 18px;
+}
+
+.card-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-size: clamp(9px, 0.95vh, 11px);
+}
+
+.card-status::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-mint);
+  box-shadow: 0 0 9px rgba(52, 245, 181, 0.55);
+}
+
+.card-status.is-hot::before {
+  background: var(--accent-amber);
+  box-shadow: 0 0 9px var(--glow-amber);
+}
+
+.card-status.is-warn::before {
+  background: var(--danger);
+  box-shadow: 0 0 9px rgba(255, 93, 108, 0.55);
+}
+
+.card-delta {
+  color: var(--accent-mint);
+  font-size: clamp(10px, 1vh, 12px);
+  font-family: 'Orbitron', 'Consolas', 'Monaco', monospace;
+}
+
+.card-delta.is-negative {
+  color: var(--danger);
 }
 
 .card-value {
@@ -201,7 +284,7 @@ function onLeave() { /* leave handled by CSS */ }
 }
 
 .card-number {
-  font-size: clamp(18px, 2.6vh, 28px);
+  font-size: clamp(17px, 2.35vh, 27px);
   font-weight: 700;
   color: #effcff;
   font-family: 'Orbitron', 'Consolas', 'Monaco', monospace;
@@ -209,6 +292,24 @@ function onLeave() { /* leave handled by CSS */ }
   animation: number-glow-breathe 3s ease-in-out infinite;
   position: relative;
   z-index: 1;
+}
+
+.card-sparkline {
+  display: flex;
+  align-items: end;
+  gap: 3px;
+  height: clamp(12px, 1.5vh, 18px);
+  margin-top: 0.38vh;
+  max-width: 46%;
+}
+
+.spark-bar {
+  width: 4px;
+  min-height: 3px;
+  border-radius: 999px 999px 0 0;
+  background: linear-gradient(180deg, var(--accent-amber), var(--accent-cyan));
+  opacity: 0.78;
+  box-shadow: 0 0 8px rgba(101, 232, 255, 0.16);
 }
 
 /* 背景暗影数字 — HUD 头盔反射 */

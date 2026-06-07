@@ -37,13 +37,16 @@
 
     <template v-else>
       <NumberCard
-        v-for="indicator in mockData.indicators.value"
+        v-for="(indicator, idx) in mockData.indicators.value"
         :key="indicator.key"
         :title="indicator.title"
         :value="indicator.value"
         :prefix="indicator.prefix"
         :suffix="indicator.suffix"
         :decimals="indicator.decimals"
+        :delta="getKpiMeta(indicator.key, idx).delta"
+        :status="getKpiMeta(indicator.key, idx).status"
+        :trend="getKpiMeta(indicator.key, idx).trend"
         :error="indicator.value == null ? '数据异常' : null"
         @click="onCardClick"
       />
@@ -102,6 +105,24 @@ const topProvince = computed(() => {
     .filter(p => p.activeSites > 0)
     .sort((a, b) => b.activeSites - a.activeSites)[0]
 })
+
+const KPI_META = {
+  totalOrderAmount: { delta: 8.7, status: '高位运行', trend: [52, 58, 61, 57, 66, 72, 78] },
+  companyOrderAmount: { delta: 6.2, status: '增长', trend: [48, 50, 55, 59, 63, 61, 70] },
+  totalOrderCount: { delta: 3.8, status: '稳定', trend: [44, 47, 45, 49, 54, 55, 57] },
+  companyOrderCount: { delta: 2.9, status: '稳定', trend: [42, 43, 46, 44, 48, 49, 51] },
+  splitRevenue: { delta: 9.4, status: '高位运行', trend: [40, 46, 53, 56, 62, 68, 76] },
+  valueAddedRevenue: { delta: -1.6, status: '需关注', trend: [66, 62, 64, 57, 55, 52, 49] },
+  activeStations: { delta: 4.1, status: '稳定', trend: [51, 52, 54, 55, 58, 59, 62] }
+}
+
+function getKpiMeta(key, idx) {
+  return KPI_META[key] || {
+    delta: 1.8 + idx,
+    status: '稳定',
+    trend: [42, 45, 49, 48, 52, 56, 58]
+  }
+}
 
 function onCardClick({ title, value }) {
   // 预留：以后可以扩展点击卡片弹详情等交互
