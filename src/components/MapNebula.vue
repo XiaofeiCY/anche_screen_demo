@@ -39,9 +39,9 @@ class DustParticle {
     const alpha = this.opacity * twinkle
     // 发光光晕
     const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 4)
-    gradient.addColorStop(0, `rgba(0, 212, 255, ${alpha})`)
+    gradient.addColorStop(0, `rgba(101, 232, 255, ${alpha})`)
     gradient.addColorStop(0.3, `rgba(0, 180, 240, ${alpha * 0.6})`)
-    gradient.addColorStop(1, 'rgba(0, 212, 255, 0)')
+    gradient.addColorStop(1, 'rgba(101, 232, 255, 0)')
     ctx.beginPath()
     ctx.arc(this.x, this.y, this.radius * 4, 0, Math.PI * 2)
     ctx.fillStyle = gradient
@@ -85,7 +85,7 @@ class FlowParticle {
       ctx.beginPath()
       ctx.moveTo(this.trail[i].x, this.trail[i].y)
       ctx.lineTo(this.trail[i + 1].x, this.trail[i + 1].y)
-      ctx.strokeStyle = `rgba(0, 212, 255, ${alpha})`
+      ctx.strokeStyle = `rgba(101, 232, 255, ${alpha})`
       ctx.lineWidth = 1
       ctx.stroke()
     }
@@ -125,7 +125,7 @@ function init() {
           ctx.beginPath()
           ctx.moveTo(dustParticles[i].x, dustParticles[i].y)
           ctx.lineTo(dustParticles[j].x, dustParticles[j].y)
-          ctx.strokeStyle = `rgba(0, 212, 255, ${alpha})`
+          ctx.strokeStyle = `rgba(101, 232, 255, ${alpha})`
           ctx.lineWidth = 0.4
           ctx.stroke()
         }

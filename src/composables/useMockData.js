@@ -10,7 +10,7 @@ import {
 /**
  * 统一 Mock 数据管理 composable
  * - 四态管理：loading / error / empty / normal
- * - 支持模拟错误（~3% 概率）
+ * - 支持手动开启模拟错误（~3% 概率）
  * - 定时轮询刷新
  */
 export function useMockData() {
@@ -39,7 +39,7 @@ export function useMockData() {
   // --- 异常模拟 ---
   const SIMULATE_ERROR_RATE = 0.03 // 3% 概率模拟异常
   let refreshCount = 0
-  const simulateErrorEnabled = ref(true)
+  const simulateErrorEnabled = ref(false)
 
   function shouldSimulateError() {
     if (!simulateErrorEnabled.value) return false

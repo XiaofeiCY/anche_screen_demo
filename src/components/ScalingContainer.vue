@@ -34,10 +34,12 @@ const contentStyle = computed(() => {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: var(--bg-deep);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: 4;
 }
 
 .scaling-content {
