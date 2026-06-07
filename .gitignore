@@ -4,3 +4,5 @@ dist/
 *.local
 .claude/
 .cc-bridge/
+pnpm-lock.yaml
+pnpm-workspace.yaml
