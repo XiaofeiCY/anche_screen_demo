@@ -47,6 +47,23 @@
         :error="indicator.value == null ? '数据异常' : null"
         @click="onCardClick"
       />
+      <div class="ops-summary">
+        <div class="ops-summary__title">实时运营脉冲</div>
+        <div class="ops-summary__grid">
+          <div class="ops-chip">
+            <span class="ops-chip__label">峰值省份</span>
+            <strong>{{ topProvince?.name || '--' }}</strong>
+          </div>
+          <div class="ops-chip">
+            <span class="ops-chip__label">站点热度</span>
+            <strong>{{ topProvince ? topProvince.activeSites.toLocaleString() : '--' }}</strong>
+          </div>
+          <div class="ops-chip ops-chip--warn">
+            <span class="ops-chip__label">异常观察</span>
+            <strong>3</strong>
+          </div>
+        </div>
+      </div>
     </template>
 
   </div>
@@ -77,6 +94,13 @@ const provinceIndicators = computed(() => {
     { key: 'orders', title: '订单数', value: p.orderCount, prefix: '', suffix: '单', decimals: 0 },
     { key: 'amount', title: '订单金额', value: p.orderAmount, prefix: '¥', suffix: '', decimals: 0 }
   ]
+})
+
+const topProvince = computed(() => {
+  const stats = mockData.provinceStats.value || []
+  return [...stats]
+    .filter(p => p.activeSites > 0)
+    .sort((a, b) => b.activeSites - a.activeSites)[0]
 })
 
 function onCardClick({ title, value }) {
@@ -123,5 +147,58 @@ function onCardClick({ title, value }) {
   text-align: center;
   padding: 4px 0 8px;
   letter-spacing: 2px;
+}
+
+.ops-summary {
+  margin-top: auto;
+  padding: clamp(8px, 1vh, 12px);
+  border: 1px solid rgba(101, 232, 255, 0.14);
+  border-radius: var(--panel-radius);
+  background:
+    linear-gradient(135deg, rgba(255, 184, 77, 0.08), transparent 42%),
+    rgba(3, 10, 18, 0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+.ops-summary__title {
+  color: #dff9ff;
+  font-size: clamp(10px, 1.1vh, 12px);
+  letter-spacing: 1.4px;
+  font-family: 'Orbitron', 'Consolas', 'Monaco', monospace;
+  margin-bottom: 8px;
+}
+
+.ops-summary__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.ops-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid rgba(101, 232, 255, 0.10);
+  background: rgba(101, 232, 255, 0.045);
+}
+
+.ops-chip__label {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.ops-chip strong {
+  color: var(--accent-cyan);
+  font-family: 'Orbitron', 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+}
+
+.ops-chip--warn strong {
+  color: var(--accent-amber);
+  text-shadow: 0 0 10px var(--glow-amber);
 }
 </style>

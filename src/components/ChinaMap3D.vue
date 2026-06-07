@@ -170,8 +170,8 @@ const map3DData = computed(() => {
         name: p.name,
         value: p.activeSites,
         itemStyle: {
-          color: isActive ? '#1a6090' : '#0d2a50',
-          borderColor: isActive ? '#00d4ff' : 'rgba(0, 180, 220, 0.35)',
+          color: isActive ? '#1e6a86' : '#102b46',
+          borderColor: isActive ? '#65e8ff' : 'rgba(101, 232, 255, 0.35)',
           borderWidth: isActive ? 2 : 1,
           opacity: isActive ? 1 : (selectedProvince.value ? 0.18 : 0.68)
         }
@@ -189,7 +189,7 @@ const nationalChartOption = computed(() => ({
   tooltip: {
     trigger: 'item',
     backgroundColor: 'rgba(2, 11, 22, 0.9)',
-    borderColor: 'rgba(0, 212, 255, 0.4)',
+    borderColor: 'rgba(101, 232, 255, 0.4)',
     textStyle: { color: '#e0e6ed', fontSize: 13 },
     formatter: (params) => {
       if (params.seriesIndex !== 0) return ''
@@ -197,8 +197,8 @@ const nationalChartOption = computed(() => ({
       if (!stats) return `<strong>${params.name}</strong>`
       return `<div style="padding:4px 8px">
         <strong style="font-size:14px">${stats.name}</strong><br/>
-        <span style="color:#00d4ff">活跃站点：</span>${stats.activeSites ?? '--'}<br/>
-        <span style="color:#00d4ff">上线站点：</span>${stats.onlineSites ?? '--'}
+        <span style="color:#65e8ff">活跃站点：</span>${stats.activeSites ?? '--'}<br/>
+        <span style="color:#65e8ff">上线站点：</span>${stats.onlineSites ?? '--'}
       </div>`
     }
   },
@@ -219,14 +219,14 @@ const nationalChartOption = computed(() => ({
       type: 'map3D',
       map: 'china',
       data: map3DData.value,
-      regionHeight: 2,
+      regionHeight: 3.2,
       shading: 'color',
       viewControl: {
         projection: 'perspective',
         autoRotate: false,
         autoRotateSpeed: 2,
         distance: viewDistance.value,
-        alpha: 35,
+        alpha: 42,
         beta: 0,
         center: [0, 0, 0],
         animation: true,
@@ -234,21 +234,21 @@ const nationalChartOption = computed(() => ({
         animationEasingUpdate: 'cubicInOut'
       },
       light: {
-        main: { intensity: 1.2, shadow: false, alpha: 40, beta: 10 },
-        ambient: { intensity: 0.7 }
+        main: { intensity: 1.55, shadow: false, alpha: 46, beta: 18 },
+        ambient: { intensity: 0.82 }
       },
       groundPlane: {
         show: false
       },
       itemStyle: {
-        color: '#0d2a50',
-        borderColor: 'rgba(0, 180, 220, 0.35)',
+        color: '#102b46',
+        borderColor: 'rgba(101, 232, 255, 0.35)',
         borderWidth: 1
       },
       emphasis: {
         itemStyle: {
-          color: '#1a6090',
-          borderColor: '#00d4ff',
+          color: '#1e6a86',
+          borderColor: '#65e8ff',
           borderWidth: 2
         }
       },
@@ -263,8 +263,8 @@ const nationalChartOption = computed(() => ({
       coordinateSystem: 'geo3D',
       data: scatterData.value,
       symbol: 'circle',
-      symbolSize: 5,
-      itemStyle: { color: '#00d4ff' },
+      symbolSize: 7,
+      itemStyle: { color: '#ffb84d' },
       zlevel: 1
     }
   ]
@@ -280,8 +280,8 @@ const cityMapData = computed(() => {
       name: city.name,
       value: city.activeSites,
       itemStyle: {
-        color: isActive ? '#1a6090' : '#0d2a50',
-        borderColor: isActive ? '#00d4ff' : 'rgba(0, 180, 220, 0.35)',
+        color: isActive ? '#1e6a86' : '#102b46',
+        borderColor: isActive ? '#65e8ff' : 'rgba(101, 232, 255, 0.35)',
         borderWidth: isActive ? 2 : 1,
         opacity: isActive ? 1 : (selectedCity.value ? 0.18 : 0.68)
       }
@@ -300,7 +300,7 @@ const guangdongChartOption = computed(() => ({
   tooltip: {
     trigger: 'item',
     backgroundColor: 'rgba(2, 11, 22, 0.9)',
-    borderColor: 'rgba(0, 212, 255, 0.4)',
+    borderColor: 'rgba(101, 232, 255, 0.4)',
     textStyle: { color: '#e0e6ed', fontSize: 13 },
     formatter: (params) => {
       if (params.seriesIndex !== 0) return ''
@@ -308,10 +308,10 @@ const guangdongChartOption = computed(() => ({
       if (!city) return `<strong>${params.name}</strong>`
       return `<div style="padding:4px 8px">
         <strong style="font-size:14px">${city.name}</strong><br/>
-        <span style="color:#00d4ff">活跃站点：</span>${city.activeSites}<br/>
-        <span style="color:#00d4ff">上线站点：</span>${city.onlineSites}<br/>
-        <span style="color:#00d4ff">订单数：</span>${city.orderCount.toLocaleString()}<br/>
-        <span style="color:#00d4ff">订单金额：</span>¥${city.orderAmount.toLocaleString()}
+        <span style="color:#65e8ff">活跃站点：</span>${city.activeSites}<br/>
+        <span style="color:#65e8ff">上线站点：</span>${city.onlineSites}<br/>
+        <span style="color:#65e8ff">订单数：</span>${city.orderCount.toLocaleString()}<br/>
+        <span style="color:#65e8ff">订单金额：</span>¥${city.orderAmount.toLocaleString()}
       </div>`
     }
   },
@@ -332,7 +332,7 @@ const guangdongChartOption = computed(() => ({
       type: 'map3D',
       map: 'guangdong',
       data: cityMapData.value,
-      regionHeight: 1.5,
+      regionHeight: 2.6,
       shading: 'color',
       viewControl: {
         projection: 'perspective',
@@ -347,21 +347,21 @@ const guangdongChartOption = computed(() => ({
         animationEasingUpdate: 'cubicInOut'
       },
       light: {
-        main: { intensity: 1.2, shadow: false, alpha: 40, beta: 10 },
-        ambient: { intensity: 0.7 }
+        main: { intensity: 1.45, shadow: false, alpha: 46, beta: 18 },
+        ambient: { intensity: 0.82 }
       },
       groundPlane: {
         show: false
       },
       itemStyle: {
-        color: '#0d2a50',
-        borderColor: 'rgba(0, 180, 220, 0.35)',
+        color: '#102b46',
+        borderColor: 'rgba(101, 232, 255, 0.35)',
         borderWidth: 1
       },
       emphasis: {
         itemStyle: {
-          color: '#1a6090',
-          borderColor: '#00d4ff',
+          color: '#1e6a86',
+          borderColor: '#65e8ff',
           borderWidth: 2
         }
       },
@@ -523,7 +523,7 @@ function startBorderBreathe() {
     const alpha = 0.25 + 0.2 * (0.5 + 0.5 * Math.sin(phase))
     chartRef.value.setOption({
       series: [{
-        itemStyle: { borderColor: `rgba(0, 180, 220, ${alpha})` }
+        itemStyle: { borderColor: `rgba(101, 232, 255, ${alpha})` }
       }]
     })
   }, 150)
@@ -611,19 +611,19 @@ onUnmounted(() => {
   padding: 5px 12px;
   font-size: 12px;
   font-family: 'Orbitron', 'Consolas', 'Monaco', monospace;
-  color: #00d4ff;
+  color: #65e8ff;
   background: rgba(2, 11, 22, 0.7);
-  border: 1px solid rgba(0, 212, 255, 0.4);
+  border: 1px solid rgba(101, 232, 255, 0.4);
   border-radius: 4px;
   cursor: pointer;
-  text-shadow: 0 0 6px #00d4ff;
-  box-shadow: 0 0 10px rgba(0, 212, 255, 0.15);
+  text-shadow: 0 0 6px #65e8ff;
+  box-shadow: 0 0 10px rgba(101, 232, 255, 0.15);
   transition: all 0.25s ease;
   letter-spacing: 1px;
 }
 
 .drill-back-btn:hover {
-  border-color: #00d4ff;
-  box-shadow: 0 0 18px rgba(0, 212, 255, 0.35), inset 0 0 10px rgba(0, 212, 255, 0.08);
+  border-color: #65e8ff;
+  box-shadow: 0 0 18px rgba(101, 232, 255, 0.35), inset 0 0 10px rgba(101, 232, 255, 0.08);
 }
 </style>

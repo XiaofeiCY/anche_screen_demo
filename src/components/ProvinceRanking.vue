@@ -124,8 +124,9 @@ function onRetry() {
   border-bottom: 1px solid var(--border-subtle);
   position: sticky;
   top: 0;
-  background: rgba(28, 63, 118, 0.95);
+  background: rgba(14, 31, 52, 0.94);
   z-index: 1;
+  font-family: 'Orbitron', 'Consolas', 'Monaco', monospace;
 }
 
 .ranking-row {
@@ -133,12 +134,13 @@ function onRetry() {
   align-items: center;
   padding: 7px 10px;
   cursor: pointer;
-  transition: background var(--transition-fast);
-  border-bottom: 1px solid rgba(77, 128, 186, 0.1);
+  transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  border-bottom: 1px solid rgba(101, 232, 255, 0.07);
 }
 
 .ranking-row:hover {
-  background: rgba(77, 128, 186, 0.15);
+  background: linear-gradient(90deg, rgba(101, 232, 255, 0.10), rgba(255, 184, 77, 0.035), transparent);
+  transform: translateX(2px);
 }
 
 .ranking-row:active,
@@ -147,8 +149,9 @@ function onRetry() {
 }
 
 .ranking-row.is-selected {
-  background: rgba(29, 112, 224, 0.2);
-  border-left: 3px solid var(--accent-cyan);
+  background: rgba(101, 232, 255, 0.12);
+  border-left: 3px solid var(--accent-amber);
+  box-shadow: inset 0 0 18px rgba(101, 232, 255, 0.08);
 }
 
 .col-rank {
@@ -162,9 +165,9 @@ function onRetry() {
   border-radius: 3px;
 }
 
-.col-rank.rank-1 { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
-.col-rank.rank-2 { background: rgba(192, 192, 192, 0.15); color: #c0c0c0; }
-.col-rank.rank-3 { background: rgba(205, 127, 50, 0.2); color: #cd7f32; }
+.col-rank.rank-1 { background: rgba(255, 184, 77, 0.22); color: #ffcf83; box-shadow: 0 0 12px rgba(255, 184, 77, 0.20); }
+.col-rank.rank-2 { background: rgba(101, 232, 255, 0.14); color: #c9f7ff; }
+.col-rank.rank-3 { background: rgba(52, 245, 181, 0.14); color: #aafbe0; }
 
 .col-name {
   flex: 0 0 68px;
@@ -181,18 +184,20 @@ function onRetry() {
 
 .progress-track {
   display: block;
-  height: 8px;
-  background: rgba(77, 128, 186, 0.2);
-  border-radius: 4px;
+  height: 7px;
+  background: rgba(101, 232, 255, 0.08);
+  border-radius: 999px;
   overflow: hidden;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.32);
 }
 
 .progress-fill {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
-  border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan), var(--accent-amber));
+  border-radius: 999px;
   transition: width 1s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 0 14px rgba(101, 232, 255, 0.28);
 }
 
 .col-count {

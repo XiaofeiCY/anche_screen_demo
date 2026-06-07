@@ -133,19 +133,19 @@ const chartOption = computed(() => ({
   tooltip: {
     trigger: 'item',
     backgroundColor: 'rgba(2, 11, 22, 0.9)',
-    borderColor: 'rgba(0, 212, 255, 0.4)',
+    borderColor: 'rgba(101, 232, 255, 0.4)',
     textStyle: { color: '#e0e6ed', fontSize: 13 },
     formatter: (params) => {
       if (params.seriesType === 'effectScatter') {
-        return `<strong>${params.name}</strong><br/><span style="color:#00d4ff">TOP省份 · 高活跃</span>`
+        return `<strong>${params.name}</strong><br/><span style="color:#65e8ff">TOP省份 · 高活跃</span>`
       }
       if (params.seriesType === 'lines') return ''
       if (!params.data) return ''
       const { name, activeSites, onlineSites } = params.data
       return `<div style="padding:4px 8px">
         <strong style="font-size:14px">${name || params.name}</strong><br/>
-        <span style="color:#00d4ff">活跃站点：</span>${activeSites ?? '--'}<br/>
-        <span style="color:#00d4ff">上线站点：</span>${onlineSites ?? '--'}
+        <span style="color:#65e8ff">活跃站点：</span>${activeSites ?? '--'}<br/>
+        <span style="color:#65e8ff">上线站点：</span>${onlineSites ?? '--'}
       </div>`
     }
   },
@@ -158,13 +158,13 @@ const chartOption = computed(() => ({
     layoutCenter: ['50%', '50%'],
     layoutSize: '100%',
     itemStyle: {
-      areaColor: '#020f1e',
-      borderColor: `rgba(0, 180, 220, 0.35)`,
+      areaColor: '#061322',
+      borderColor: `rgba(101, 232, 255, 0.35)`,
       borderWidth: 1,
-      shadowColor: `rgba(0, 212, 255, 0.28)`,
+      shadowColor: `rgba(101, 232, 255, 0.28)`,
       shadowOffsetX: 0,
       shadowOffsetY: 8,
-      shadowBlur: 20
+      shadowBlur: 26
     },
     emphasis: { disabled: true },
     label: { show: false },
@@ -177,7 +177,7 @@ const chartOption = computed(() => ({
     max: maxValue.value,
     left: 20,
     bottom: 20,
-    inRange: { color: ['#0a1e3d', '#0a4a8a', '#00a8cc', '#00d4ff'] },
+    inRange: { color: ['#061727', '#123b63', '#1f87a7', '#65e8ff', '#ffb84d'] },
     text: ['高', '低'],
     textStyle: { color: '#7a8fa0' },
     itemWidth: 8,
@@ -194,24 +194,24 @@ const chartOption = computed(() => ({
       scaleLimit: { min: 1, max: 5 },
       geoIndex: 0,
       itemStyle: {
-        areaColor: '#0d2a50',
-        borderColor: `rgba(0, 180, 220, 0.50)`,
+        areaColor: '#102b46',
+        borderColor: `rgba(101, 232, 255, 0.50)`,
         borderWidth: 1
       },
       emphasis: {
         itemStyle: {
-          areaColor: '#1a6090',
-          borderColor: '#00d4ff',
+          areaColor: '#1e6a86',
+          borderColor: '#65e8ff',
           borderWidth: 2,
-          shadowBlur: 16,
-          shadowColor: 'rgba(0, 212, 255, 0.5)'
+          shadowBlur: 22,
+          shadowColor: 'rgba(101, 232, 255, 0.5)'
         },
         label: { show: true, color: '#fff', fontSize: 12 }
       },
       select: {
         itemStyle: {
-          areaColor: '#1a6090',
-          borderColor: '#00d4ff',
+          areaColor: '#1e6a86',
+          borderColor: '#65e8ff',
           borderWidth: 2
         },
         label: { show: true, color: '#fff' }
@@ -232,20 +232,20 @@ const chartOption = computed(() => ({
       rippleEffect: {
         number: 4,
         period: 6,
-        scale: 4.5,
+        scale: 5.4,
         brushType: 'stroke'
       },
       symbol: 'circle',
       symbolSize: 7,
       itemStyle: {
-        color: '#00d4ff',
-        shadowBlur: 18,
-        shadowColor: '#00d4ff'
+        color: '#ffb84d',
+        shadowBlur: 20,
+        shadowColor: '#ffb84d'
       },
       label: {
         show: true,
         position: 'right',
-        color: '#00d4ff',
+        color: '#ffcf83',
         fontSize: 9,
         formatter: '{b}'
       },
@@ -266,7 +266,7 @@ const chartOption = computed(() => ({
         symbolSize: 5
       },
       lineStyle: {
-        color: '#00d4ff',
+        color: '#65e8ff',
         width: 1.2,
         curveness: 0.3,
         opacity: 0.55
@@ -351,10 +351,10 @@ function startBorderBreathe() {
     const alpha = 0.25 + 0.2 * (0.5 + 0.5 * Math.sin(phase))
     chartRef.value.setOption({
       geo: {
-        itemStyle: { borderColor: `rgba(0, 180, 220, ${alpha})` }
+        itemStyle: { borderColor: `rgba(101, 232, 255, ${alpha})` }
       },
       series: [{
-        itemStyle: { borderColor: `rgba(0, 180, 220, ${alpha + 0.15})` }
+        itemStyle: { borderColor: `rgba(101, 232, 255, ${alpha + 0.15})` }
       }]
     })
   }, 100)
@@ -413,4 +413,3 @@ onUnmounted(() => {
   cursor: pointer;
 }
 </style>
-

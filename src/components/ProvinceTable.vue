@@ -163,8 +163,9 @@ onUnmounted(() => {
   font-size: 11px;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border-subtle);
-  background: rgba(28, 63, 118, 0.95);
+  background: rgba(14, 31, 52, 0.94);
   flex-shrink: 0;
+  font-family: 'Orbitron', 'Consolas', 'Monaco', monospace;
 }
 
 .table-body {
@@ -183,12 +184,13 @@ onUnmounted(() => {
   height: 31px;
   padding: 0 10px;
   cursor: pointer;
-  transition: background var(--transition-fast);
-  border-bottom: 1px solid rgba(77, 128, 186, 0.08);
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  border-bottom: 1px solid rgba(101, 232, 255, 0.06);
 }
 
 .table-row:hover {
-  background: rgba(0, 212, 255, 0.1);
+  background: linear-gradient(90deg, rgba(101, 232, 255, 0.10), rgba(255, 184, 77, 0.035), transparent);
+  transform: translateX(2px);
 }
 
 .table-row:active {
@@ -196,8 +198,8 @@ onUnmounted(() => {
 }
 
 .table-row.is-selected {
-  background: rgba(0, 212, 255, 0.15);
-  box-shadow: inset 2px 0 0 var(--accent-cyan);
+  background: rgba(101, 232, 255, 0.12);
+  box-shadow: inset 2px 0 0 var(--accent-amber);
 }
 
 .th-rank {
@@ -227,7 +229,7 @@ onUnmounted(() => {
   font-size: 13px;
   text-align: right;
   font-family: 'Consolas', 'Monaco', monospace;
-  color: var(--accent-cyan);
+  color: #9cf2ff;
 }
 
 .empty-state {

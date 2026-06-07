@@ -100,11 +100,11 @@ function onLeave() { /* leave handled by CSS */ }
 
 <style scoped>
 .number-card {
-  background: var(--bg-panel);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background:
+    linear-gradient(135deg, rgba(101, 232, 255, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(10, 26, 43, 0.88), rgba(3, 10, 18, 0.92));
   border-radius: var(--panel-radius);
-  border: 1px solid var(--border-panel);
+  border: 1px solid rgba(101, 232, 255, 0.16);
   padding: clamp(6px, 1vh, 12px) clamp(8px, 1vw, 16px);
   cursor: pointer;
   position: relative;
@@ -116,6 +116,10 @@ function onLeave() { /* leave handled by CSS */ }
   user-select: none;
   -webkit-user-select: none;
   overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(101, 232, 255, 0.08),
+    0 12px 32px rgba(0, 0, 0, 0.20);
 }
 
 /* 科技角标 */
@@ -123,21 +127,24 @@ function onLeave() { /* leave handled by CSS */ }
   content: '';
   position: absolute;
   top: 0; left: 0;
-  width: 10px; height: 10px;
-  border-top: 2px solid var(--accent-cyan);
-  border-left: 2px solid var(--accent-cyan);
-  opacity: 0.4;
+  width: 42%;
+  height: 1px;
+  border: 0;
+  background: linear-gradient(90deg, var(--accent-cyan), transparent);
+  opacity: 0.58;
   transition: opacity var(--transition-fast);
 }
 
 .number-card::after {
   content: '';
   position: absolute;
-  bottom: 0; right: 0;
-  width: 10px; height: 10px;
-  border-bottom: 2px solid var(--accent-cyan);
-  border-right: 2px solid var(--accent-cyan);
-  opacity: 0.4;
+  bottom: 0;
+  right: 0;
+  width: 28%;
+  height: 2px;
+  border: 0;
+  background: linear-gradient(90deg, transparent, var(--accent-amber));
+  opacity: 0.52;
   transition: opacity var(--transition-fast);
 }
 
@@ -147,9 +154,13 @@ function onLeave() { /* leave handled by CSS */ }
 }
 
 .number-card:hover {
-  background: var(--bg-panel-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 0 20px var(--glow-cyan), inset 0 0 20px rgba(0, 212, 255, 0.05);
+  background:
+    linear-gradient(135deg, rgba(101, 232, 255, 0.12), rgba(255, 184, 77, 0.04) 46%, transparent),
+    var(--bg-panel-hover);
+  transform: translateY(-2px) scale(1.006);
+  box-shadow:
+    0 0 24px rgba(101, 232, 255, 0.20),
+    inset 0 0 24px rgba(101, 232, 255, 0.05);
   border-color: var(--accent-cyan);
 }
 
@@ -171,7 +182,7 @@ function onLeave() { /* leave handled by CSS */ }
 .card-title {
   font-size: clamp(10px, 1.2vh, 13px);
   color: var(--text-secondary);
-  margin-bottom: 0.3vh;
+  margin-bottom: 0.42vh;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -192,9 +203,9 @@ function onLeave() { /* leave handled by CSS */ }
 .card-number {
   font-size: clamp(18px, 2.6vh, 28px);
   font-weight: 700;
-  color: #e0f0ff;
+  color: #effcff;
   font-family: 'Orbitron', 'Consolas', 'Monaco', monospace;
-  letter-spacing: 2px;
+  letter-spacing: 1.2px;
   animation: number-glow-breathe 3s ease-in-out infinite;
   position: relative;
   z-index: 1;
@@ -208,7 +219,7 @@ function onLeave() { /* leave handled by CSS */ }
   font-size: clamp(28px, 4.5vh, 50px);
   font-weight: 900;
   font-family: 'Orbitron', 'Consolas', monospace;
-  color: rgba(0, 212, 255, 0.04);
+  color: rgba(101, 232, 255, 0.035);
   letter-spacing: 2px;
   pointer-events: none;
   z-index: 0;
@@ -218,15 +229,15 @@ function onLeave() { /* leave handled by CSS */ }
 /* 底部发光槽 */
 .card-glow-bar {
   position: absolute;
-  bottom: 2px;
-  left: 10%;
-  width: 80%;
+  bottom: 3px;
+  left: 12%;
+  width: 76%;
   height: 1.5px;
   background: linear-gradient(90deg,
     transparent 0%,
-    rgba(0, 212, 255, 0.3) 15%,
-    rgba(0, 212, 255, 0.8) 50%,
-    rgba(0, 212, 255, 0.3) 85%,
+    rgba(101, 232, 255, 0.24) 15%,
+    rgba(255, 184, 77, 0.9) 50%,
+    rgba(101, 232, 255, 0.28) 85%,
     transparent 100%
   );
   border-radius: 1px;
