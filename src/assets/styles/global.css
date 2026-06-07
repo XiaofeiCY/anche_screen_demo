@@ -22,40 +22,44 @@
 }
 
 :root {
-  /* 2.0 深邃底色 */
-  --bg-deep: #020b16;
-  --bg-primary: #051428;
-  --bg-panel: rgba(8, 32, 64, 0.55);
-  --bg-panel-hover: rgba(12, 48, 96, 0.7);
+  /* 指挥中心底色 */
+  --bg-deep: #02050a;
+  --bg-primary: #06101b;
+  --bg-panel: rgba(5, 17, 30, 0.68);
+  --bg-panel-hover: rgba(12, 34, 54, 0.82);
+  --bg-panel-solid: #071322;
 
-  /* 2.0 霓虹强调色 */
-  --accent-cyan: #00d4ff;
-  --accent-blue: #0a6eff;
-  --accent-purple: #7c3aed;
+  /* 指挥中心强调色 */
+  --accent-cyan: #65e8ff;
+  --accent-blue: #2478ff;
+  --accent-purple: #5964ff;
+  --accent-amber: #ffb84d;
+  --accent-mint: #34f5b5;
 
   /* 发光色 */
-  --glow-cyan: rgba(0, 212, 255, 0.35);
-  --glow-blue: rgba(10, 110, 255, 0.4);
-  --glow-cyan-strong: rgba(0, 212, 255, 0.6);
+  --glow-cyan: rgba(101, 232, 255, 0.28);
+  --glow-blue: rgba(36, 120, 255, 0.32);
+  --glow-cyan-strong: rgba(101, 232, 255, 0.55);
+  --glow-amber: rgba(255, 184, 77, 0.34);
 
   /* 文字 */
-  --text-primary: #e0e6ed;
-  --text-secondary: #7a8fa0;
-  --text-dim: #4a5a6a;
+  --text-primary: #eef8ff;
+  --text-secondary: #8fa7ba;
+  --text-dim: #536a7b;
 
   /* 功能色 */
-  --success: #00e676;
-  --danger: #ff5252;
+  --success: #34f5b5;
+  --danger: #ff5d6c;
 
   /* 边框 */
-  --border-glow: rgba(0, 212, 255, 0.2);
-  --border-panel: rgba(10, 110, 255, 0.25);
-  --border-subtle: rgba(0, 180, 220, 0.15);
+  --border-glow: rgba(101, 232, 255, 0.24);
+  --border-panel: rgba(89, 169, 255, 0.22);
+  --border-subtle: rgba(101, 232, 255, 0.12);
 
   /* 尺寸 */
-  --panel-radius: 4px;
-  --transition-fast: 0.2s ease;
-  --transition-normal: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --panel-radius: 6px;
+  --transition-fast: 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+  --transition-normal: 0.55s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 /* ========== 全局 ========== */
@@ -71,12 +75,40 @@ html, body {
   user-select: none;
 }
 
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(2, 5, 10, 0.34), rgba(2, 5, 10, 0.86)),
+    url('../images/command-bg.png') center / cover no-repeat;
+  opacity: 0.78;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(101, 232, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(101, 232, 255, 0.026) 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, transparent 0 45%, rgba(2, 5, 10, 0.62) 100%);
+  background-size: 48px 48px, 48px 48px, 100% 100%;
+  mix-blend-mode: screen;
+  opacity: 0.58;
+}
+
 /* ========== 粒子背景层 ========== */
 #particles-canvas {
   position: fixed;
   top: 0; left: 0;
-  z-index: 0;
+  z-index: 2;
   pointer-events: none;
+  opacity: 0.75;
 }
 
 /* ========== 扫描线 ========== */
@@ -87,12 +119,12 @@ html, body {
   height: 2px;
   background: linear-gradient(90deg,
     transparent 0%,
-    rgba(0, 212, 255, 0.15) 20%,
-    rgba(0, 212, 255, 0.4) 50%,
-    rgba(0, 212, 255, 0.15) 80%,
+    rgba(101, 232, 255, 0.06) 20%,
+    rgba(255, 184, 77, 0.45) 50%,
+    rgba(101, 232, 255, 0.10) 80%,
     transparent 100%
   );
-  z-index: 1;
+  z-index: 3;
   pointer-events: none;
   animation: scanDown 6s linear infinite;
 }
@@ -156,12 +188,16 @@ html, body {
 
 /* ========== 玻璃态面板 ========== */
 .glass-panel {
-  background: var(--bg-panel);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background:
+    linear-gradient(145deg, rgba(12, 35, 58, 0.78), rgba(4, 12, 22, 0.88)),
+    var(--bg-panel);
   border: 1px solid var(--border-glow);
   border-radius: var(--panel-radius);
   position: relative;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(101, 232, 255, 0.08),
+    0 20px 60px rgba(0, 0, 0, 0.18);
 }
 
 /* 科技角标 */
