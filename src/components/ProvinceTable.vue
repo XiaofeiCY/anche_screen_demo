@@ -22,6 +22,7 @@
     >
       <div class="table-header">
         <span class="th-rank">#</span>
+        <span class="th-state">态势</span>
         <span class="th-name">省份</span>
         <span class="th-count">订单数</span>
         <span class="th-amount">订单金额</span>
@@ -36,6 +37,20 @@
             @click="selectRow(item)"
           >
             <span class="th-rank">{{ item.orderRank }}</span>
+            <span class="th-state">
+              <img
+                v-if="getRowState(item).type === 'watch'"
+                class="state-alert"
+                src="../assets/images/hud/alert-beacon.png"
+                alt=""
+                aria-hidden="true"
+              />
+              <span
+                v-else
+                class="state-dot"
+                :class="'is-' + getRowState(item).type"
+              />
+            </span>
             <span class="th-name">{{ item.name }}</span>
             <span class="th-count">{{ item.orderCount.toLocaleString() }}</span>
             <span class="th-amount">{{ formatCurrency(item.orderAmount) }}</span>
@@ -122,6 +137,13 @@ function resumeScroll() {
   isPaused.value = false
 }
 
+function getRowState(item) {
+  if (item.orderRank <= 3) return { type: 'hot', label: '增长' }
+  if (item.orderRank % 7 === 0) return { type: 'watch', label: '关注' }
+  if (item.orderRank % 5 === 0) return { type: 'cool', label: '回落' }
+  return { type: 'stable', label: '稳定' }
+}
+
 const selectRow = debounce((item) => {
   if (selectedProvince.value === item.name) {
     mockData.clearSelection()
@@ -203,14 +225,21 @@ onUnmounted(() => {
 }
 
 .th-rank {
-  flex: 0 0 30px;
+  flex: 0 0 28px;
   font-size: 12px;
   color: var(--text-secondary);
   text-align: center;
 }
 
+.th-state {
+  flex: 0 0 34px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .th-name {
-  flex: 0 0 76px;
+  flex: 0 0 68px;
   font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
@@ -218,7 +247,7 @@ onUnmounted(() => {
 }
 
 .th-count {
-  flex: 0 0 80px;
+  flex: 0 0 76px;
   font-size: 13px;
   text-align: right;
   font-family: 'Consolas', 'Monaco', monospace;
@@ -230,6 +259,32 @@ onUnmounted(() => {
   text-align: right;
   font-family: 'Consolas', 'Monaco', monospace;
   color: #9cf2ff;
+}
+
+.state-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-mint);
+  box-shadow: 0 0 10px rgba(52, 245, 181, 0.55);
+}
+
+.state-dot.is-hot {
+  background: var(--accent-amber);
+  box-shadow: 0 0 12px var(--glow-amber);
+}
+
+.state-dot.is-cool {
+  background: var(--accent-blue);
+  box-shadow: 0 0 10px rgba(36, 120, 255, 0.55);
+}
+
+.state-alert {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: saturate(0.92);
+  opacity: 0.82;
 }
 
 .empty-state {

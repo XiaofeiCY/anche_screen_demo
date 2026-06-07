@@ -1,19 +1,19 @@
 <template>
   <div class="right-panel">
     <div class="right-section right-section--chart">
-      <div class="section-title">近七天全国订单趋势</div>
+      <div class="section-title">实时订单趋势 · LIVE TRACE</div>
       <div class="section-body">
         <TrendChart />
       </div>
     </div>
     <div class="right-section right-section--ranking">
-      <div class="section-title">近七天TOP10省份活跃度</div>
+      <div class="section-title">TOP10 省份活跃赛道</div>
       <div class="section-body">
         <ProvinceRanking />
       </div>
     </div>
     <div class="right-section right-section--table">
-      <div class="section-title">省份订单排名</div>
+      <div class="section-title">重点省份态势流</div>
       <div class="section-body">
         <ProvinceTable />
       </div>
